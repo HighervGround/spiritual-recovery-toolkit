@@ -164,6 +164,7 @@ export const supabaseStorage = {
         stepNumber,
         completed: existing?.completed || false,
         notes: existing?.notes || '',
+        reflectionAnswers: existing?.reflection_answers || {},
         lastUpdated: existing?.last_updated || new Date().toISOString(),
       };
     });
