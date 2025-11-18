@@ -155,7 +155,8 @@ export function Journal() {
 
   const filteredEntries = entries.filter(entry => 
     entry.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    entry.content.toLowerCase().includes(searchQuery.toLowerCase())
+    entry.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (entry.prompt && entry.prompt.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
   // List View - iPhone Notes style
@@ -202,11 +203,11 @@ export function Journal() {
               <button
                 key={entry.id}
                 onClick={() => handleViewEntry(entry)}
-                className="w-full bg-white hover:bg-slate-50 p-4 text-left transition-colors"
+                className="w-full bg-white hover:bg-slate-50 p-4 text-left transition-colors border-b border-slate-100"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
+                    <div className="flex items-center gap-2 mb-1 flex-wrap">
                       <h3 className="font-semibold text-slate-900 truncate">
                         {entry.title}
                       </h3>
@@ -215,8 +216,18 @@ export function Journal() {
                           {entry.type === 'daily' ? 'Daily' : 'Weekly'}
                         </span>
                       )}
+                      {entry.prompt && (
+                        <span className="inline-flex items-center px-2 py-0.5 text-xs rounded-full bg-purple-100 text-purple-700 flex-shrink-0">
+                          📝 Prompt
+                        </span>
+                      )}
                     </div>
-                    <div className="flex items-center gap-2 text-sm text-slate-500 mb-1">
+                    {entry.prompt && (
+                      <p className="text-xs text-purple-600 italic mb-1 line-clamp-1">
+                        {entry.prompt}
+                      </p>
+                    )}
+                    <div className="flex items-center gap-2 text-sm text-slate-500">
                       <span>{formatDate(entry.date)}</span>
                       <span className="text-slate-300">•</span>
                       <span className="truncate">{getPreviewText(entry.content)}</span>
