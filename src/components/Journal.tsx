@@ -48,6 +48,7 @@ export function Journal() {
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [currentEntry, setCurrentEntry] = useState('');
   const [currentTitle, setCurrentTitle] = useState('');
+  const [titleManuallyEdited, setTitleManuallyEdited] = useState(false);
   const [selectedPrompt, setSelectedPrompt] = useState('');
   const [entryType, setEntryType] = useState<'daily' | 'weekly' | 'free'>('free');
   const [editingEntry, setEditingEntry] = useState<JournalEntry | null>(null);
@@ -86,6 +87,7 @@ export function Journal() {
   const handleEditEntry = (entry: JournalEntry) => {
     setEditingEntry(entry);
     setCurrentTitle(entry.title);
+    setTitleManuallyEdited(true); // Existing titles are considered manually set
     setCurrentEntry(entry.content);
     setSelectedPrompt(entry.prompt);
     setEntryType(entry.type);
@@ -110,6 +112,7 @@ export function Journal() {
   const resetEditor = () => {
     setCurrentEntry('');
     setCurrentTitle('');
+    setTitleManuallyEdited(false);
     setSelectedPrompt('');
     setEntryType('free');
     setEditingEntry(null);
@@ -338,10 +341,18 @@ export function Journal() {
           {/* Title Input */}
           <input
             type="text"
-            value={currentTitle}
-            onChange={(e) => setCurrentTitle(e.target.value)}
-            placeholder="Title"
-            className="w-full text-3xl font-bold text-slate-900 placeholder-slate-400 border-0 focus:outline-none focus:ring-0 p-0 mb-4 bg-transparent"
+            value={titleManuallyEdited ? currentTitle : (currentTitle || getDefaultTitle(currentEntry))}
+            onChange={(e) => {
+              setCurrentTitle(e.target.value);
+              setTitleManuallyEdited(true);
+            }}
+            onFocus={() => {
+              if (!titleManuallyEdited && !currentTitle) {
+                setCurrentTitle(getDefaultTitle(currentEntry));
+              }
+            }}
+            placeholder={currentEntry ? getDefaultTitle(currentEntry) : "Title (auto-generates from first line)"}
+            className="w-full text-2xl sm:text-3xl font-bold text-slate-900 placeholder-slate-400 border-0 focus:outline-none focus:ring-0 p-0 mb-4 bg-transparent"
           />
 
           {/* Date Display */}
