@@ -71,7 +71,7 @@ export function Journal() {
 
     const entry: JournalEntry = {
       id: editingEntry?.id || Date.now().toString(),
-      title: currentTitle.trim() || getDefaultTitle(currentEntry),
+      title: currentTitle.trim() || getDefaultTitle(currentEntry, selectedPrompt),
       date: editingEntry?.date || new Date().toISOString(),
       prompt: selectedPrompt,
       content: currentEntry,
@@ -118,7 +118,11 @@ export function Journal() {
     setEditingEntry(null);
   };
 
-  const getDefaultTitle = (content: string): string => {
+  const getDefaultTitle = (content: string, prompt?: string): string => {
+    if (prompt) {
+      // For prompts, use a shortened version (first 60 chars)
+      return prompt.slice(0, 60) + (prompt.length > 60 ? '...' : '');
+    }
     const firstLine = content.split('\n')[0].trim();
     return firstLine.slice(0, 50) || 'Untitled Note';
   };
@@ -341,17 +345,23 @@ export function Journal() {
           {/* Title Input */}
           <input
             type="text"
-            value={titleManuallyEdited ? currentTitle : (currentTitle || getDefaultTitle(currentEntry))}
+            value={titleManuallyEdited ? currentTitle : (currentTitle || getDefaultTitle(currentEntry, selectedPrompt))}
             onChange={(e) => {
               setCurrentTitle(e.target.value);
               setTitleManuallyEdited(true);
             }}
             onFocus={() => {
               if (!titleManuallyEdited && !currentTitle) {
-                setCurrentTitle(getDefaultTitle(currentEntry));
+                setCurrentTitle(getDefaultTitle(currentEntry, selectedPrompt));
               }
             }}
-            placeholder={currentEntry ? getDefaultTitle(currentEntry) : "Title (auto-generates from first line)"}
+            placeholder={
+              selectedPrompt 
+                ? getDefaultTitle(currentEntry, selectedPrompt)
+                : currentEntry 
+                  ? getDefaultTitle(currentEntry) 
+                  : "Title (auto-generates from prompt or first line)"
+            }
             className="w-full text-2xl sm:text-3xl font-bold text-slate-900 placeholder-slate-400 border-0 focus:outline-none focus:ring-0 p-0 mb-4 bg-transparent"
           />
 
