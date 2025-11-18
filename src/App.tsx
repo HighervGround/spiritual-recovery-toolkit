@@ -139,13 +139,13 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
-      {/* Header */}
-      <header className="bg-white/80 backdrop-blur-sm border-b border-slate-200 sticky top-0 z-10">
-        <div className="max-w-6xl mx-auto px-3 sm:px-6 py-2 sm:py-3">
-          <div className="flex items-center justify-between mb-2 sm:mb-3">
+      {/* Header - Desktop */}
+      <header className="hidden sm:block bg-white/80 backdrop-blur-sm border-b border-slate-200 sticky top-0 z-10">
+        <div className="max-w-6xl mx-auto px-6 py-3">
+          <div className="flex items-center justify-between mb-3">
             <div>
-              <h1 className="text-base sm:text-lg font-semibold text-slate-800">
-                Cole's Spiritual<br className="sm:hidden" /> Recovery Toolkit
+              <h1 className="text-lg font-semibold text-slate-800">
+                Cole's Spiritual Recovery Toolkit
               </h1>
               {useSupabase && user && (
                 <p className="text-xs text-slate-500 mt-0.5">
@@ -160,31 +160,31 @@ export default function App() {
                 </p>
               )}
             </div>
-            <div className="flex gap-1 sm:gap-2">
+            <div className="flex gap-2">
               {useSupabase && user && (
                 <button
                   onClick={handleSignOut}
-                  className="flex items-center gap-1 px-2 py-1.5 sm:px-3 sm:py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors text-xs sm:text-sm"
+                  className="flex items-center gap-1 px-3 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors text-sm"
                 >
                   <LogOut className="w-4 h-4" />
-                  <span className="hidden sm:inline">Sign Out</span>
+                  <span>Sign Out</span>
                 </button>
               )}
               <button
                 onClick={() => setShowSettings(!showSettings)}
-                className="flex items-center gap-1 px-2 py-1.5 sm:px-3 sm:py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors text-xs sm:text-sm"
+                className="flex items-center gap-1 px-3 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors text-sm"
               >
                 <Settings className="w-4 h-4" />
-                <span className="hidden sm:inline">Settings</span>
+                <span>Settings</span>
               </button>
             </div>
           </div>
           
           {/* Navigation */}
-          <nav className="flex flex-col sm:flex-row gap-2 justify-center">
+          <nav className="flex gap-2 justify-center">
             <button
               onClick={() => setActiveSection('workbook')}
-              className={`flex items-center justify-center gap-1.5 px-3 py-2 sm:px-4 sm:py-2.5 rounded-lg transition-all text-sm ${
+              className={`flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-lg transition-all text-sm ${
                 activeSection === 'workbook'
                   ? 'bg-blue-600 text-white shadow-lg'
                   : 'bg-white text-slate-700 hover:bg-slate-50 border border-slate-200'
@@ -196,7 +196,7 @@ export default function App() {
             
             <button
               onClick={() => setActiveSection('plan')}
-              className={`flex items-center justify-center gap-1.5 px-3 py-2 sm:px-4 sm:py-2.5 rounded-lg transition-all text-sm ${
+              className={`flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-lg transition-all text-sm ${
                 activeSection === 'plan'
                   ? 'bg-blue-600 text-white shadow-lg'
                   : 'bg-white text-slate-700 hover:bg-slate-50 border border-slate-200'
@@ -208,7 +208,7 @@ export default function App() {
             
             <button
               onClick={() => setActiveSection('journal')}
-              className={`flex items-center justify-center gap-1.5 px-3 py-2 sm:px-4 sm:py-2.5 rounded-lg transition-all text-sm ${
+              className={`flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-lg transition-all text-sm ${
                 activeSection === 'journal'
                   ? 'bg-blue-600 text-white shadow-lg'
                   : 'bg-white text-slate-700 hover:bg-slate-50 border border-slate-200'
@@ -220,6 +220,80 @@ export default function App() {
           </nav>
         </div>
       </header>
+
+      {/* Header - Mobile (minimal) */}
+      <header className="sm:hidden bg-white/80 backdrop-blur-sm border-b border-slate-200 sticky top-0 z-10">
+        <div className="flex items-center justify-between px-3 py-2">
+          <div className="flex items-center gap-2">
+            <h1 className="text-sm font-semibold text-slate-800">
+              Cole's Spiritual Recovery Toolkit
+            </h1>
+            {useSupabase && user && (
+              <Cloud className="w-3 h-3 text-slate-400" />
+            )}
+            {!useSupabase && (
+              <HardDrive className="w-3 h-3 text-slate-400" />
+            )}
+          </div>
+          <div className="flex gap-1">
+            {useSupabase && user && (
+              <button
+                onClick={handleSignOut}
+                className="p-1.5 rounded-lg bg-slate-100 active:bg-slate-200 text-slate-700"
+              >
+                <LogOut className="w-4 h-4" />
+              </button>
+            )}
+            <button
+              onClick={() => setShowSettings(!showSettings)}
+              className="p-1.5 rounded-lg bg-slate-100 active:bg-slate-200 text-slate-700"
+            >
+              <Settings className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {/* Bottom Navigation - Mobile Only */}
+      <nav className="sm:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-slate-200 z-20">
+        <div className="flex justify-around items-center h-16">
+          <button
+            onClick={() => setActiveSection('workbook')}
+            className={`flex flex-col items-center justify-center flex-1 h-full transition-colors ${
+              activeSection === 'workbook'
+                ? 'text-blue-600'
+                : 'text-slate-500 active:bg-slate-50'
+            }`}
+          >
+            <BookOpen className="w-6 h-6 mb-1" />
+            <span className="text-xs font-medium">Workbook</span>
+          </button>
+          
+          <button
+            onClick={() => setActiveSection('plan')}
+            className={`flex flex-col items-center justify-center flex-1 h-full transition-colors ${
+              activeSection === 'plan'
+                ? 'text-blue-600'
+                : 'text-slate-500 active:bg-slate-50'
+            }`}
+          >
+            <Calendar className="w-6 h-6 mb-1" />
+            <span className="text-xs font-medium">Plan</span>
+          </button>
+          
+          <button
+            onClick={() => setActiveSection('journal')}
+            className={`flex flex-col items-center justify-center flex-1 h-full transition-colors ${
+              activeSection === 'journal'
+                ? 'text-blue-600'
+                : 'text-slate-500 active:bg-slate-50'
+            }`}
+          >
+            <NotebookPen className="w-6 h-6 mb-1" />
+            <span className="text-xs font-medium">Journal</span>
+          </button>
+        </div>
+      </nav>
 
       {/* Settings Modal */}
       {showSettings && (
@@ -321,7 +395,7 @@ export default function App() {
       )}
 
       {/* Main Content */}
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-4 sm:py-8 pb-20 sm:pb-8">
         {activeSection === 'workbook' && <Workbook storage={storageBackend} />}
         {activeSection === 'plan' && <WeeklyPlan storage={storageBackend} />}
         {activeSection === 'journal' && <Journal storage={storageBackend} />}
