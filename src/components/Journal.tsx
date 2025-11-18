@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Trash2, Plus, Calendar as CalendarIcon, Edit2, X, Search, ArrowLeft, Check } from 'lucide-react';
+import { Trash2, Plus, Calendar as CalendarIcon, Edit2, X, Search, ArrowLeft, Check, ChevronRight } from 'lucide-react';
 import { storage, JournalEntry } from '../lib/storage';
 
 const dailyPrompts = [
@@ -53,6 +53,7 @@ export function Journal() {
   const [editingEntry, setEditingEntry] = useState<JournalEntry | null>(null);
   const [selectedEntry, setSelectedEntry] = useState<JournalEntry | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [showPromptPicker, setShowPromptPicker] = useState(false);
 
   useEffect(() => {
     loadEntries();
@@ -371,21 +372,52 @@ export function Journal() {
             </button>
           </div>
 
-          {/* Prompt Selection */}
+          {/* Prompt Selection - Mobile First */}
           {entryType !== 'free' && (
-            <select
-              value={selectedPrompt}
-              onChange={(e) => setSelectedPrompt(e.target.value)}
-              className="w-full px-4 py-4 rounded-lg border-2 border-slate-300 text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4 bg-white text-lg"
-              style={{ fontSize: '20px', minHeight: '60px', lineHeight: '1.5' }}
-            >
-              <option value="">Select a prompt...</option>
-              {(entryType === 'daily' ? dailyPrompts : weeklyPrompts).map((prompt, idx) => (
-                <option key={idx} value={prompt}>
-                  {prompt}
-                </option>
-              ))}
-            </select>
+            <>
+              <button
+                onClick={() => setShowPromptPicker(true)}
+                className="w-full px-4 py-4 rounded-lg border-2 border-slate-300 text-left focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4 bg-white flex items-center justify-between"
+              >
+                <span className={`text-lg ${selectedPrompt ? 'text-slate-900' : 'text-slate-500'}`}>
+                  {selectedPrompt || 'Tap to select a prompt...'}
+                </span>
+                <ChevronRight className="w-5 h-5 text-slate-400" />
+              </button>
+
+              {/* Prompt Picker Modal */}
+              {showPromptPicker && (
+                <div className="fixed inset-0 bg-white z-50 flex flex-col">
+                  <div className="border-b border-slate-200 p-3 flex items-center justify-between sticky top-0 bg-white">
+                    <h2 className="text-lg font-semibold text-slate-900">
+                      {entryType === 'daily' ? 'Daily Prompts' : 'Weekly Prompts'}
+                    </h2>
+                    <button
+                      onClick={() => setShowPromptPicker(false)}
+                      className="p-2 hover:bg-slate-100 rounded-lg"
+                    >
+                      <X className="w-6 h-6" />
+                    </button>
+                  </div>
+                  <div className="flex-1 overflow-y-auto">
+                    {(entryType === 'daily' ? dailyPrompts : weeklyPrompts).map((prompt, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => {
+                          setSelectedPrompt(prompt);
+                          setShowPromptPicker(false);
+                        }}
+                        className={`w-full px-4 py-5 text-left border-b border-slate-200 hover:bg-slate-50 active:bg-slate-100 transition-colors ${
+                          selectedPrompt === prompt ? 'bg-blue-50 border-l-4 border-l-blue-600' : ''
+                        }`}
+                      >
+                        <p className="text-base leading-relaxed text-slate-700">{prompt}</p>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </>
           )}
 
           {selectedPrompt && (
