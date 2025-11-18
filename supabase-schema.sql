@@ -99,6 +99,7 @@ CREATE TABLE IF NOT EXISTS public.weekly_progress (
   user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
   week_number INTEGER NOT NULL CHECK (week_number >= 1 AND week_number <= 12),
   completed BOOLEAN DEFAULT FALSE,
+  notes TEXT DEFAULT '',
   last_updated TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   UNIQUE(user_id, week_number)

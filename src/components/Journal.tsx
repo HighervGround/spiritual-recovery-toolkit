@@ -163,14 +163,14 @@ export function Journal() {
       <div className="min-h-screen bg-slate-50">
         {/* Header */}
         <div className="bg-white border-b border-slate-200 sticky top-0 z-10">
-          <div className="p-4">
-            <div className="flex items-center justify-between mb-3">
-              <h1 className="text-2xl font-bold text-slate-900">Notes</h1>
+          <div className="p-3">
+            <div className="flex items-center justify-between mb-2">
+              <h1 className="text-xl font-bold text-slate-900">Notes</h1>
               <button
                 onClick={() => setViewMode('resources')}
-                className="text-sm text-blue-600 hover:text-blue-700"
+                className="text-xs text-blue-600 hover:text-blue-700 px-2 py-1"
               >
-                Prompts & Tips
+                Prompts
               </button>
             </div>
             
@@ -181,20 +181,10 @@ export function Journal() {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search notes..."
-                className="w-full pl-10 pr-4 py-2 bg-slate-100 border-0 rounded-lg text-slate-900 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Search..."
+                className="w-full pl-10 pr-4 py-2 bg-slate-100 border-0 rounded-lg text-sm text-slate-900 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
-          </div>
-
-          {/* Entry Type Filter */}
-          <div className="flex gap-2 px-4 pb-3 overflow-x-auto">
-            <button
-              onClick={() => setSearchQuery('')}
-              className="px-3 py-1 text-sm rounded-full bg-slate-100 text-slate-700 whitespace-nowrap"
-            >
-              All ({entries.length})
-            </button>
           </div>
         </div>
 
@@ -256,15 +246,15 @@ export function Journal() {
     return (
       <div className="min-h-screen bg-white flex flex-col">
         {/* Header */}
-        <div className="border-b border-slate-200 p-4 flex items-center justify-between sticky top-0 bg-white z-10">
+        <div className="border-b border-slate-200 p-2 flex items-center justify-between sticky top-0 bg-white z-10">
           <button
             onClick={() => setViewMode('list')}
-            className="flex items-center gap-2 text-blue-600 hover:text-blue-700"
+            className="flex items-center gap-1 text-blue-600 hover:text-blue-700 p-2"
           >
             <ArrowLeft className="w-5 h-5" />
-            <span>Notes</span>
+            <span className="text-sm">Notes</span>
           </button>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
             <button
               onClick={() => handleEditEntry(selectedEntry)}
               className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
@@ -310,24 +300,24 @@ export function Journal() {
     return (
       <div className="min-h-screen bg-white flex flex-col">
         {/* Header */}
-        <div className="border-b border-slate-200 p-4 flex items-center justify-between sticky top-0 bg-white z-10">
+        <div className="border-b border-slate-200 p-2 flex items-center justify-between sticky top-0 bg-white z-10">
           <button
             onClick={() => {
               resetEditor();
               setViewMode('list');
             }}
-            className="flex items-center gap-2 text-blue-600 hover:text-blue-700"
+            className="flex items-center gap-1 text-blue-600 hover:text-blue-700 p-2"
           >
             <X className="w-5 h-5" />
-            <span>Cancel</span>
+            <span className="text-sm">Cancel</span>
           </button>
           <button
             onClick={handleSaveEntry}
             disabled={!currentEntry.trim()}
-            className="flex items-center gap-2 text-blue-600 hover:text-blue-700 disabled:text-slate-300 disabled:cursor-not-allowed font-semibold"
+            className="flex items-center gap-1 text-blue-600 hover:text-blue-700 disabled:text-slate-300 disabled:cursor-not-allowed font-semibold p-2"
           >
             <Check className="w-5 h-5" />
-            <span>Done</span>
+            <span className="text-sm">Done</span>
           </button>
         </div>
 
@@ -421,15 +411,15 @@ export function Journal() {
     return (
       <div className="min-h-screen bg-slate-50">
         {/* Header */}
-        <div className="bg-white border-b border-slate-200 sticky top-0 z-10 p-4">
+        <div className="bg-white border-b border-slate-200 sticky top-0 z-10 p-3">
           <button
             onClick={() => setViewMode('list')}
-            className="flex items-center gap-2 text-blue-600 hover:text-blue-700 mb-3"
+            className="flex items-center gap-1 text-blue-600 hover:text-blue-700 mb-2 p-1"
           >
             <ArrowLeft className="w-5 h-5" />
-            <span>Back to Notes</span>
+            <span className="text-sm">Notes</span>
           </button>
-          <h1 className="text-2xl font-bold text-slate-900">Prompts & Resources</h1>
+          <h1 className="text-xl font-bold text-slate-900">Prompts & Resources</h1>
         </div>
 
         <div className="p-4 space-y-4">

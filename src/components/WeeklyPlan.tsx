@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Check } from 'lucide-react';
-import { storage } from '../lib/storage';
+import { Check, Edit2, Save, X, ChevronDown, ChevronUp } from 'lucide-react';
+import { storage, WeekProgress } from '../lib/storage';
 
 interface Week {
   number: number;
@@ -124,18 +124,53 @@ const weeklyPlan: Week[] = [
 ];
 
 export function WeeklyPlan() {
-  const [weekProgress, setWeekProgress] = useState<{ [key: number]: boolean }>({});
+  const [weekProgress, setWeekProgress] = useState<WeekProgress[]>([]);
+  const [expandedWeek, setExpandedWeek] = useState<number | null>(null);
+  const [editingNotes, setEditingNotes] = useState<number | null>(null);
+  const [currentNotes, setCurrentNotes] = useState('');
 
   useEffect(() => {
-    setWeekProgress(storage.getWeeklyPlanProgress());
+    setWeekProgress(storage.getWeekProgress());
   }, []);
 
-  const toggleWeekComplete = (weekNumber: number) => {
-    storage.toggleWeekProgress(weekNumber);
-    setWeekProgress(storage.getWeeklyPlanProgress());
+  const getWeekProgress = (weekNumber: number): WeekProgress => {
+    return weekProgress.find(w => w.weekNumber === weekNumber) || {
+      weekNumber,
+      completed: false,
+      notes: '',
+      lastUpdated: new Date().toISOString(),
+    };
   };
 
-  const completedWeeks = Object.values(weekProgress).filter(Boolean).length;
+  const toggleWeekComplete = (weekNumber: number) => {
+    const current = getWeekProgress(weekNumber);
+    storage.updateWeekProgress(weekNumber, { completed: !current.completed });
+    setWeekProgress(storage.getWeekProgress());
+  };
+
+  const toggleWeek = (weekNumber: number) => {
+    setExpandedWeek(expandedWeek === weekNumber ? null : weekNumber);
+  };
+
+  const startEditingNotes = (weekNumber: number) => {
+    const current = getWeekProgress(weekNumber);
+    setCurrentNotes(current.notes);
+    setEditingNotes(weekNumber);
+  };
+
+  const saveNotes = (weekNumber: number) => {
+    storage.updateWeekProgress(weekNumber, { notes: currentNotes });
+    setWeekProgress(storage.getWeekProgress());
+    setEditingNotes(null);
+    setCurrentNotes('');
+  };
+
+  const cancelEditingNotes = () => {
+    setEditingNotes(null);
+    setCurrentNotes('');
+  };
+
+  const completedWeeks = weekProgress.filter(w => w.completed).length;
 
   return (
     <div className="space-y-6">
@@ -165,62 +200,133 @@ export function WeeklyPlan() {
         </div>
       </div>
 
-      <div className="grid gap-6">
+      <div className="grid gap-4">
         {weeklyPlan.map((week) => {
-          const isCompleted = weekProgress[week.number] || false;
+          const progress = getWeekProgress(week.number);
+          const isExpanded = expandedWeek === week.number;
+          
           return (
             <div
               key={week.number}
-              className={`bg-white rounded-xl p-6 shadow-sm border hover:shadow-md transition-shadow ${
-                isCompleted ? 'border-green-300 bg-green-50/30' : 'border-slate-200'
+              className={`bg-white rounded-xl shadow-sm border hover:shadow-md transition-shadow ${
+                progress.completed ? 'border-green-300 bg-green-50/30' : 'border-slate-200'
               }`}
             >
-              <div className="flex items-start gap-4 mb-4">
-                <button
-                  onClick={() => toggleWeekComplete(week.number)}
-                  className={`flex items-center justify-center w-12 h-12 rounded-full shrink-0 transition-colors ${
-                    isCompleted
-                      ? 'bg-green-600 text-white hover:bg-green-700'
-                      : 'bg-gradient-to-br from-blue-500 to-indigo-600 text-white hover:from-blue-600 hover:to-indigo-700'
-                  }`}
-                  title={isCompleted ? 'Mark as incomplete' : 'Mark as complete'}
-                >
-                  {isCompleted ? <Check className="w-7 h-7" /> : week.number}
-                </button>
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <h3 className="text-slate-800">Week {week.number}: {week.steps}</h3>
-                    {isCompleted && (
-                      <span className="px-2 py-1 text-xs rounded bg-green-100 text-green-700">
-                        Completed
-                      </span>
+              {/* Week Header */}
+              <button
+                onClick={() => toggleWeek(week.number)}
+                className="w-full px-6 py-4 flex items-start justify-between gap-4 text-left hover:bg-slate-50 transition-colors"
+              >
+                <div className="flex items-start gap-4 flex-1">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleWeekComplete(week.number);
+                    }}
+                    className={`flex items-center justify-center w-12 h-12 rounded-full shrink-0 transition-colors ${
+                      progress.completed
+                        ? 'bg-green-600 text-white hover:bg-green-700'
+                        : 'bg-gradient-to-br from-blue-500 to-indigo-600 text-white hover:from-blue-600 hover:to-indigo-700'
+                    }`}
+                    title={progress.completed ? 'Mark as incomplete' : 'Mark as complete'}
+                  >
+                    {progress.completed ? <Check className="w-7 h-7" /> : week.number}
+                  </button>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1 flex-wrap">
+                      <h3 className="text-slate-800">Week {week.number}: {week.steps}</h3>
+                      {progress.completed && (
+                        <span className="px-2 py-1 text-xs rounded bg-green-100 text-green-700">
+                          Completed
+                        </span>
+                      )}
+                      {progress.notes && (
+                        <span className="px-2 py-1 text-xs rounded bg-amber-100 text-amber-700">
+                          📝 Notes
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-blue-600 text-sm">{week.theme}</p>
+                  </div>
+                </div>
+                {isExpanded ? (
+                  <ChevronUp className="w-5 h-5 text-slate-400 shrink-0 mt-1" />
+                ) : (
+                  <ChevronDown className="w-5 h-5 text-slate-400 shrink-0 mt-1" />
+                )}
+              </button>
+
+              {/* Expanded Content */}
+              {isExpanded && (
+                <div className="px-6 pb-6 space-y-4 border-t border-slate-100">
+                  {/* Personal Notes Section */}
+                  <div className="pt-4 bg-amber-50 rounded-lg p-5 border border-amber-200">
+                    <div className="flex items-center justify-between mb-3">
+                      <h4 className="text-slate-800">📝 Your Week Notes</h4>
+                      {editingNotes !== week.number && (
+                        <button
+                          onClick={() => startEditingNotes(week.number)}
+                          className="flex items-center gap-2 px-3 py-1.5 text-sm bg-white rounded-lg hover:bg-slate-50 transition-colors border border-slate-200"
+                        >
+                          <Edit2 className="w-4 h-4" />
+                          {progress.notes ? 'Edit' : 'Add Notes'}
+                        </button>
+                      )}
+                    </div>
+                    
+                    {editingNotes === week.number ? (
+                      <div className="space-y-3">
+                        <textarea
+                          value={currentNotes}
+                          onChange={(e) => setCurrentNotes(e.target.value)}
+                          placeholder="Write your personal reflections, progress, insights, or goals for this week..."
+                          className="w-full min-h-[120px] px-4 py-3 rounded-lg border border-slate-300 text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y bg-white"
+                        />
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => saveNotes(week.number)}
+                            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                          >
+                            <Save className="w-4 h-4" />
+                            Save
+                          </button>
+                          <button
+                            onClick={cancelEditingNotes}
+                            className="flex items-center gap-2 px-4 py-2 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 transition-colors"
+                          >
+                            <X className="w-4 h-4" />
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    ) : progress.notes ? (
+                      <p className="text-slate-700 whitespace-pre-wrap leading-relaxed">{progress.notes}</p>
+                    ) : (
+                      <p className="text-slate-500 italic text-sm">No notes yet. Click "Add Notes" to record your thoughts and progress for this week.</p>
                     )}
                   </div>
-                  <p className="text-blue-600">{week.theme}</p>
+
+                  <div>
+                    <h4 className="text-slate-700 mb-1 text-sm font-semibold">Emotional Focus</h4>
+                    <p className="text-slate-600 text-sm">{week.emotionalFocus}</p>
+                  </div>
+
+                  <div>
+                    <h4 className="text-slate-700 mb-1 text-sm font-semibold">Daily Practice</h4>
+                    <p className="text-slate-600 leading-relaxed text-sm">{week.dailyPractice}</p>
+                  </div>
+
+                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4 border-l-4 border-blue-500">
+                    <h4 className="text-slate-700 mb-1 text-sm font-semibold">This Week's Affirmation</h4>
+                    <p className="text-slate-800 italic text-sm">"{week.affirmation}"</p>
+                  </div>
+
+                  <div className="bg-slate-50 rounded-lg p-4">
+                    <h4 className="text-slate-700 mb-1 text-sm font-semibold">Grounding Exercise</h4>
+                    <p className="text-slate-600 text-sm">{week.grounding}</p>
+                  </div>
                 </div>
-              </div>
-
-            <div className="space-y-4 pl-16">
-              <div>
-                <h4 className="text-slate-700 mb-1">Emotional Focus</h4>
-                <p className="text-slate-600">{week.emotionalFocus}</p>
-              </div>
-
-              <div>
-                <h4 className="text-slate-700 mb-1">Daily Practice</h4>
-                <p className="text-slate-600 leading-relaxed">{week.dailyPractice}</p>
-              </div>
-
-              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4 border-l-4 border-blue-500">
-                <h4 className="text-slate-700 mb-1">This Week's Affirmation</h4>
-                <p className="text-slate-800 italic">"{week.affirmation}"</p>
-              </div>
-
-              <div className="bg-slate-50 rounded-lg p-4">
-                <h4 className="text-slate-700 mb-1">Grounding Exercise</h4>
-                <p className="text-slate-600">{week.grounding}</p>
-              </div>
-              </div>
+              )}
             </div>
           );
         })}

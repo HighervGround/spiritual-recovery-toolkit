@@ -18,6 +18,13 @@ export interface StepProgress {
   lastUpdated: string;
 }
 
+export interface WeekProgress {
+  weekNumber: number;
+  completed: boolean;
+  notes: string;
+  lastUpdated: string;
+}
+
 export const supabaseStorage = {
   // Authentication helpers
   async getCurrentUser() {
@@ -220,6 +227,84 @@ export const supabaseStorage = {
     });
 
     return progress;
+  },
+
+  async getWeekProgress(): Promise<WeekProgress[]> {
+    const user = await this.getCurrentUser();
+    if (!user) {
+      // Return default progress if not authenticated
+      return Array.from({ length: 12 }, (_, i) => ({
+        weekNumber: i + 1,
+        completed: false,
+        notes: '',
+        lastUpdated: new Date().toISOString(),
+      }));
+    }
+
+    const { data, error } = await supabase
+      .from('weekly_progress')
+      .select('*')
+      .eq('user_id', user.id);
+
+    if (error) throw error;
+
+    // Create a map of existing progress
+    const progressMap = new Map(
+      (data || []).map(w => [w.week_number, w])
+    );
+
+    // Return all 12 weeks, filling in defaults for missing ones
+    return Array.from({ length: 12 }, (_, i) => {
+      const weekNumber = i + 1;
+      const existing = progressMap.get(weekNumber);
+      return {
+        weekNumber,
+        completed: existing?.completed || false,
+        notes: existing?.notes || '',
+        lastUpdated: existing?.last_updated || new Date().toISOString(),
+      };
+    });
+  },
+
+  async updateWeekProgress(weekNumber: number, updates: Partial<WeekProgress>): Promise<void> {
+    const user = await this.getCurrentUser();
+    if (!user) throw new Error('User not authenticated');
+
+    // Check if week progress exists
+    const { data: existing } = await supabase
+      .from('weekly_progress')
+      .select('id')
+      .eq('user_id', user.id)
+      .eq('week_number', weekNumber)
+      .single();
+
+    const updateData = {
+      completed: updates.completed,
+      notes: updates.notes,
+      last_updated: new Date().toISOString(),
+    };
+
+    if (existing) {
+      // Update existing
+      const { error } = await supabase
+        .from('weekly_progress')
+        .update(updateData)
+        .eq('user_id', user.id)
+        .eq('week_number', weekNumber);
+
+      if (error) throw error;
+    } else {
+      // Insert new
+      const { error } = await supabase
+        .from('weekly_progress')
+        .insert({
+          user_id: user.id,
+          week_number: weekNumber,
+          ...updateData,
+        });
+
+      if (error) throw error;
+    }
   },
 
   async toggleWeekProgress(weekNumber: number): Promise<void> {

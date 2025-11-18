@@ -16,10 +16,18 @@ export interface StepProgress {
   lastUpdated: string;
 }
 
+export interface WeekProgress {
+  weekNumber: number;
+  completed: boolean;
+  notes: string;
+  lastUpdated: string;
+}
+
 export interface AppData {
   journalEntries: JournalEntry[];
   stepProgress: StepProgress[];
   weeklyPlanProgress: { [weekNumber: number]: boolean };
+  weekProgress: WeekProgress[];
 }
 
 const STORAGE_KEY = 'spiritual-recovery-toolkit-data';
@@ -30,7 +38,17 @@ export const storage = {
     try {
       const data = localStorage.getItem(STORAGE_KEY);
       if (data) {
-        return JSON.parse(data);
+        const parsed = JSON.parse(data);
+        // Migrate old data if needed
+        if (!parsed.weekProgress) {
+          parsed.weekProgress = Array.from({ length: 12 }, (_, i) => ({
+            weekNumber: i + 1,
+            completed: parsed.weeklyPlanProgress?.[i + 1] || false,
+            notes: '',
+            lastUpdated: new Date().toISOString(),
+          }));
+        }
+        return parsed;
       }
     } catch (error) {
       console.error('Error reading from localStorage:', error);
@@ -45,6 +63,12 @@ export const storage = {
         lastUpdated: new Date().toISOString(),
       })),
       weeklyPlanProgress: {},
+      weekProgress: Array.from({ length: 12 }, (_, i) => ({
+        weekNumber: i + 1,
+        completed: false,
+        notes: '',
+        lastUpdated: new Date().toISOString(),
+      })),
     };
   },
 
@@ -102,13 +126,45 @@ export const storage = {
 
   // Weekly plan progress
   getWeeklyPlanProgress(): { [weekNumber: number]: boolean } {
-    return this.getData().weeklyPlanProgress;
+    // For backwards compatibility, also return from new structure
+    const data = this.getData();
+    const progress: { [key: number]: boolean } = {};
+    data.weekProgress.forEach(week => {
+      progress[week.weekNumber] = week.completed;
+    });
+    return progress;
+  },
+
+  getWeekProgress(): WeekProgress[] {
+    return this.getData().weekProgress;
   },
 
   toggleWeekProgress(weekNumber: number): void {
     const data = this.getData();
+    const weekIndex = data.weekProgress.findIndex(w => w.weekNumber === weekNumber);
+    
+    if (weekIndex >= 0) {
+      data.weekProgress[weekIndex].completed = !data.weekProgress[weekIndex].completed;
+      data.weekProgress[weekIndex].lastUpdated = new Date().toISOString();
+    }
+    
+    // Also update old structure for backwards compatibility
     data.weeklyPlanProgress[weekNumber] = !data.weeklyPlanProgress[weekNumber];
     this.saveData(data);
+  },
+
+  updateWeekProgress(weekNumber: number, updates: Partial<WeekProgress>): void {
+    const data = this.getData();
+    const weekIndex = data.weekProgress.findIndex(w => w.weekNumber === weekNumber);
+    
+    if (weekIndex >= 0) {
+      data.weekProgress[weekIndex] = {
+        ...data.weekProgress[weekIndex],
+        ...updates,
+        lastUpdated: new Date().toISOString(),
+      };
+      this.saveData(data);
+    }
   },
 
   // Export/Import
