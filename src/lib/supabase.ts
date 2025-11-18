@@ -37,6 +37,7 @@ export interface Database {
         Row: {
           id: string;
           user_id: string;
+          title: string;
           date: string;
           prompt: string | null;
           content: string;
@@ -47,6 +48,7 @@ export interface Database {
         Insert: {
           id?: string;
           user_id: string;
+          title?: string;
           date?: string;
           prompt?: string | null;
           content: string;
@@ -57,6 +59,7 @@ export interface Database {
         Update: {
           id?: string;
           user_id?: string;
+          title?: string;
           date?: string;
           prompt?: string | null;
           content?: string;
@@ -123,4 +126,5 @@ export interface Database {
     };
   };
 }
+
 

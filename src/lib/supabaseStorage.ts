@@ -4,6 +4,7 @@ import { supabase } from './supabase';
 
 export interface JournalEntry {
   id: string;
+  title: string;
   date: string;
   prompt: string;
   content: string;
@@ -62,6 +63,7 @@ export const supabaseStorage = {
 
     return (data || []).map(entry => ({
       id: entry.id,
+      title: entry.title || '',
       date: entry.date,
       prompt: entry.prompt || '',
       content: entry.content,
@@ -85,6 +87,7 @@ export const supabaseStorage = {
       const { error } = await supabase
         .from('journal_entries')
         .update({
+          title: entry.title,
           content: entry.content,
           prompt: entry.prompt,
           type: entry.type,
@@ -100,6 +103,7 @@ export const supabaseStorage = {
         .insert({
           id: entry.id,
           user_id: user.id,
+          title: entry.title,
           content: entry.content,
           prompt: entry.prompt,
           type: entry.type,
@@ -327,4 +331,5 @@ export const supabaseStorage = {
     ]);
   },
 };
+
 

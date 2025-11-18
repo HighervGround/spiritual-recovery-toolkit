@@ -147,3 +147,4 @@ Once setup is complete, you can:
 
 **Important**: Keep your `.env` file secure and never commit it to git. The `.gitignore` file is already configured to exclude it.
 
+

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Trash2, Plus, Calendar as CalendarIcon } from 'lucide-react';
+import { Trash2, Plus, Calendar as CalendarIcon, Edit2, X, Search, ArrowLeft, Check } from 'lucide-react';
 import { storage, JournalEntry } from '../lib/storage';
 
 const dailyPrompts = [
@@ -41,78 +41,317 @@ const affirmations = [
   "I am becoming who I was always meant to be."
 ];
 
+type ViewMode = 'list' | 'edit' | 'view' | 'resources';
+
 export function Journal() {
   const [entries, setEntries] = useState<JournalEntry[]>([]);
+  const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [currentEntry, setCurrentEntry] = useState('');
+  const [currentTitle, setCurrentTitle] = useState('');
   const [selectedPrompt, setSelectedPrompt] = useState('');
   const [entryType, setEntryType] = useState<'daily' | 'weekly' | 'free'>('free');
+  const [editingEntry, setEditingEntry] = useState<JournalEntry | null>(null);
+  const [selectedEntry, setSelectedEntry] = useState<JournalEntry | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
+    loadEntries();
+  }, []);
+
+  const loadEntries = () => {
     setEntries(storage.getJournalEntries().sort((a, b) => 
       new Date(b.date).getTime() - new Date(a.date).getTime()
     ));
-  }, []);
+  };
 
   const handleSaveEntry = () => {
     if (!currentEntry.trim()) return;
 
-    const newEntry: JournalEntry = {
-      id: Date.now().toString(),
-      date: new Date().toISOString(),
+    const entry: JournalEntry = {
+      id: editingEntry?.id || Date.now().toString(),
+      title: currentTitle.trim() || getDefaultTitle(currentEntry),
+      date: editingEntry?.date || new Date().toISOString(),
       prompt: selectedPrompt,
       content: currentEntry,
       type: entryType,
     };
 
-    storage.saveJournalEntry(newEntry);
-    setEntries([newEntry, ...entries]);
-    setCurrentEntry('');
-    setSelectedPrompt('');
+    storage.saveJournalEntry(entry);
+    loadEntries();
+    resetEditor();
+    setViewMode('list');
+  };
+
+  const handleEditEntry = (entry: JournalEntry) => {
+    setEditingEntry(entry);
+    setCurrentTitle(entry.title);
+    setCurrentEntry(entry.content);
+    setSelectedPrompt(entry.prompt);
+    setEntryType(entry.type);
+    setViewMode('edit');
+  };
+
+  const handleViewEntry = (entry: JournalEntry) => {
+    setSelectedEntry(entry);
+    setViewMode('view');
   };
 
   const handleDeleteEntry = (id: string) => {
-    if (confirm('Are you sure you want to delete this entry?')) {
+    if (confirm('Are you sure you want to delete this note?')) {
       storage.deleteJournalEntry(id);
-      setEntries(entries.filter(e => e.id !== id));
+      loadEntries();
+      if (selectedEntry?.id === id) {
+        setViewMode('list');
+      }
     }
+  };
+
+  const resetEditor = () => {
+    setCurrentEntry('');
+    setCurrentTitle('');
+    setSelectedPrompt('');
+    setEntryType('free');
+    setEditingEntry(null);
+  };
+
+  const getDefaultTitle = (content: string): string => {
+    const firstLine = content.split('\n')[0].trim();
+    return firstLine.slice(0, 50) || 'Untitled Note';
   };
 
   const formatDate = (isoString: string) => {
     const date = new Date(isoString);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 0) {
+      return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+    } else if (diffDays === 1) {
+      return 'Yesterday';
+    } else if (diffDays < 7) {
+      return date.toLocaleDateString('en-US', { weekday: 'long' });
+    } else {
+      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    }
+  };
+
+  const formatFullDate = (isoString: string) => {
+    const date = new Date(isoString);
     return date.toLocaleDateString('en-US', { 
-      weekday: 'long', 
-      year: 'numeric', 
+      weekday: 'long',
       month: 'long', 
       day: 'numeric',
-      hour: '2-digit',
+      year: 'numeric',
+      hour: 'numeric',
       minute: '2-digit'
     });
   };
-  return (
-    <div className="space-y-6">
-      <div className="bg-white rounded-xl p-8 shadow-sm border border-slate-200">
-        <h2 className="text-slate-800 mb-4">📔 Cole's Spiritual Recovery Journal</h2>
-        <p className="text-slate-600 leading-relaxed">
-          This journal is your sacred space for reflection, processing, and integration. Use these prompts as often as you need—daily, 
-          weekly, or whenever you feel called to write. There is no right way to journal. Let your words flow without judgment.
-        </p>
-      </div>
 
-      {/* New Journal Entry */}
-      <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white">
-            <Plus className="w-5 h-5" />
+  const getPreviewText = (content: string): string => {
+    return content.slice(0, 100).replace(/\n/g, ' ');
+  };
+
+  const filteredEntries = entries.filter(entry => 
+    entry.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    entry.content.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  // List View - iPhone Notes style
+  if (viewMode === 'list') {
+    return (
+      <div className="min-h-screen bg-slate-50">
+        {/* Header */}
+        <div className="bg-white border-b border-slate-200 sticky top-0 z-10">
+          <div className="p-4">
+            <div className="flex items-center justify-between mb-3">
+              <h1 className="text-2xl font-bold text-slate-900">Notes</h1>
+              <button
+                onClick={() => setViewMode('resources')}
+                className="text-sm text-blue-600 hover:text-blue-700"
+              >
+                Prompts & Tips
+              </button>
+            </div>
+            
+            {/* Search Bar */}
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search notes..."
+                className="w-full pl-10 pr-4 py-2 bg-slate-100 border-0 rounded-lg text-slate-900 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
           </div>
-          <h3 className="text-slate-800">New Journal Entry</h3>
+
+          {/* Entry Type Filter */}
+          <div className="flex gap-2 px-4 pb-3 overflow-x-auto">
+            <button
+              onClick={() => setSearchQuery('')}
+              className="px-3 py-1 text-sm rounded-full bg-slate-100 text-slate-700 whitespace-nowrap"
+            >
+              All ({entries.length})
+            </button>
+          </div>
         </div>
 
-        <div className="space-y-4">
+        {/* Notes List */}
+        <div className="divide-y divide-slate-200">
+          {filteredEntries.length === 0 ? (
+            <div className="text-center py-16 px-4">
+              <div className="text-6xl mb-4">📝</div>
+              <h3 className="text-lg font-semibold text-slate-900 mb-2">No notes yet</h3>
+              <p className="text-slate-600 mb-6">Start writing your first note</p>
+            </div>
+          ) : (
+            filteredEntries.map((entry) => (
+              <button
+                key={entry.id}
+                onClick={() => handleViewEntry(entry)}
+                className="w-full bg-white hover:bg-slate-50 p-4 text-left transition-colors"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h3 className="font-semibold text-slate-900 truncate">
+                        {entry.title}
+                      </h3>
+                      {entry.type !== 'free' && (
+                        <span className="inline-flex items-center px-2 py-0.5 text-xs rounded-full bg-blue-100 text-blue-700 flex-shrink-0">
+                          {entry.type === 'daily' ? 'Daily' : 'Weekly'}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-slate-500 mb-1">
+                      <span>{formatDate(entry.date)}</span>
+                      <span className="text-slate-300">•</span>
+                      <span className="truncate">{getPreviewText(entry.content)}</span>
+                    </div>
+                  </div>
+                </div>
+              </button>
+            ))
+          )}
+        </div>
+
+        {/* Floating Action Button */}
+        <button
+          onClick={() => {
+            resetEditor();
+            setViewMode('edit');
+          }}
+          className="fixed bottom-6 right-6 w-14 h-14 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg flex items-center justify-center transition-all hover:scale-110"
+        >
+          <Plus className="w-6 h-6" />
+        </button>
+      </div>
+    );
+  }
+
+  // View Entry Mode
+  if (viewMode === 'view' && selectedEntry) {
+    return (
+      <div className="min-h-screen bg-white flex flex-col">
+        {/* Header */}
+        <div className="border-b border-slate-200 p-4 flex items-center justify-between sticky top-0 bg-white z-10">
+          <button
+            onClick={() => setViewMode('list')}
+            className="flex items-center gap-2 text-blue-600 hover:text-blue-700"
+          >
+            <ArrowLeft className="w-5 h-5" />
+            <span>Notes</span>
+          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => handleEditEntry(selectedEntry)}
+              className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+            >
+              <Edit2 className="w-5 h-5 text-slate-600" />
+            </button>
+            <button
+              onClick={() => handleDeleteEntry(selectedEntry.id)}
+              className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+            >
+              <Trash2 className="w-5 h-5 text-slate-600" />
+            </button>
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 p-6 overflow-y-auto">
+          <h1 className="text-3xl font-bold text-slate-900 mb-2">
+            {selectedEntry.title}
+          </h1>
+          <p className="text-sm text-slate-500 mb-6">
+            {formatFullDate(selectedEntry.date)}
+          </p>
+          
+          {selectedEntry.prompt && (
+            <div className="bg-blue-50 border-l-4 border-blue-500 rounded-lg p-4 mb-6">
+              <p className="text-sm text-blue-900 italic">{selectedEntry.prompt}</p>
+            </div>
+          )}
+          
+          <div className="prose prose-slate max-w-none">
+            <p className="text-slate-700 whitespace-pre-wrap leading-relaxed text-lg">
+              {selectedEntry.content}
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Edit/Create Mode
+  if (viewMode === 'edit') {
+    return (
+      <div className="min-h-screen bg-white flex flex-col">
+        {/* Header */}
+        <div className="border-b border-slate-200 p-4 flex items-center justify-between sticky top-0 bg-white z-10">
+          <button
+            onClick={() => {
+              resetEditor();
+              setViewMode('list');
+            }}
+            className="flex items-center gap-2 text-blue-600 hover:text-blue-700"
+          >
+            <X className="w-5 h-5" />
+            <span>Cancel</span>
+          </button>
+          <button
+            onClick={handleSaveEntry}
+            disabled={!currentEntry.trim()}
+            className="flex items-center gap-2 text-blue-600 hover:text-blue-700 disabled:text-slate-300 disabled:cursor-not-allowed font-semibold"
+          >
+            <Check className="w-5 h-5" />
+            <span>Done</span>
+          </button>
+        </div>
+
+        {/* Editor */}
+        <div className="flex-1 p-6 overflow-y-auto">
+          {/* Title Input */}
+          <input
+            type="text"
+            value={currentTitle}
+            onChange={(e) => setCurrentTitle(e.target.value)}
+            placeholder="Title"
+            className="w-full text-3xl font-bold text-slate-900 placeholder-slate-400 border-0 focus:outline-none focus:ring-0 p-0 mb-4 bg-transparent"
+          />
+
+          {/* Date Display */}
+          <p className="text-sm text-slate-500 mb-6">
+            {formatFullDate(editingEntry?.date || new Date().toISOString())}
+          </p>
+
           {/* Entry Type Selection */}
-          <div className="flex gap-2">
+          <div className="flex gap-2 mb-4 flex-wrap">
             <button
               onClick={() => setEntryType('free')}
-              className={`px-4 py-2 rounded-lg transition-colors ${
+              className={`px-3 py-1.5 text-sm rounded-full transition-colors ${
                 entryType === 'free'
                   ? 'bg-blue-600 text-white'
                   : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
@@ -122,7 +361,7 @@ export function Journal() {
             </button>
             <button
               onClick={() => setEntryType('daily')}
-              className={`px-4 py-2 rounded-lg transition-colors ${
+              className={`px-3 py-1.5 text-sm rounded-full transition-colors ${
                 entryType === 'daily'
                   ? 'bg-blue-600 text-white'
                   : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
@@ -132,7 +371,7 @@ export function Journal() {
             </button>
             <button
               onClick={() => setEntryType('weekly')}
-              className={`px-4 py-2 rounded-lg transition-colors ${
+              className={`px-3 py-1.5 text-sm rounded-full transition-colors ${
                 entryType === 'weekly'
                   ? 'bg-blue-600 text-white'
                   : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
@@ -147,7 +386,7 @@ export function Journal() {
             <select
               value={selectedPrompt}
               onChange={(e) => setSelectedPrompt(e.target.value)}
-              className="w-full px-4 py-3 rounded-lg border border-slate-300 text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-3 rounded-lg border border-slate-300 text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4 bg-white"
             >
               <option value="">Select a prompt...</option>
               {(entryType === 'daily' ? dailyPrompts : weeklyPrompts).map((prompt, idx) => (
@@ -159,172 +398,132 @@ export function Journal() {
           )}
 
           {selectedPrompt && (
-            <div className="bg-blue-50 rounded-lg p-4 border-l-4 border-blue-500">
-              <p className="text-slate-700">{selectedPrompt}</p>
+            <div className="bg-blue-50 border-l-4 border-blue-500 rounded-lg p-4 mb-4">
+              <p className="text-sm text-blue-900 italic">{selectedPrompt}</p>
             </div>
           )}
 
-          {/* Text Area */}
+          {/* Content Textarea */}
           <textarea
             value={currentEntry}
             onChange={(e) => setCurrentEntry(e.target.value)}
-            placeholder="Write your thoughts here..."
-            className="w-full min-h-[200px] px-4 py-3 rounded-lg border border-slate-300 text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y"
+            placeholder="Start writing..."
+            className="w-full min-h-[400px] text-lg text-slate-700 placeholder-slate-400 border-0 focus:outline-none focus:ring-0 p-0 resize-none bg-transparent"
+            autoFocus
           />
+        </div>
+      </div>
+    );
+  }
 
-          {/* Save Button */}
+  // Resources View
+  if (viewMode === 'resources') {
+    return (
+      <div className="min-h-screen bg-slate-50">
+        {/* Header */}
+        <div className="bg-white border-b border-slate-200 sticky top-0 z-10 p-4">
           <button
-            onClick={handleSaveEntry}
-            disabled={!currentEntry.trim()}
-            className="w-full px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:bg-slate-300 disabled:cursor-not-allowed"
+            onClick={() => setViewMode('list')}
+            className="flex items-center gap-2 text-blue-600 hover:text-blue-700 mb-3"
           >
-            Save Entry
+            <ArrowLeft className="w-5 h-5" />
+            <span>Back to Notes</span>
           </button>
+          <h1 className="text-2xl font-bold text-slate-900">Prompts & Resources</h1>
         </div>
-      </div>
 
-      {/* Saved Entries */}
-      {entries.length > 0 && (
-        <div className="space-y-4">
-          <h3 className="text-slate-800">Previous Entries ({entries.length})</h3>
-          {entries.map((entry) => (
-            <div key={entry.id} className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
-              <div className="flex items-start justify-between mb-3">
-                <div className="flex items-center gap-3">
-                  <CalendarIcon className="w-5 h-5 text-slate-400" />
-                  <div>
-                    <p className="text-sm text-slate-500">{formatDate(entry.date)}</p>
-                    {entry.type !== 'free' && (
-                      <span className="inline-block mt-1 px-2 py-1 text-xs rounded bg-blue-100 text-blue-700">
-                        {entry.type === 'daily' ? 'Daily Reflection' : 'Weekly Reflection'}
-                      </span>
-                    )}
-                  </div>
-                </div>
-                <button
-                  onClick={() => handleDeleteEntry(entry.id)}
-                  className="text-slate-400 hover:text-red-600 transition-colors"
-                >
-                  <Trash2 className="w-5 h-5" />
-                </button>
+        <div className="p-4 space-y-4">
+          {/* Daily Prompts */}
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-700">
+                📝
               </div>
-              
-              {entry.prompt && (
-                <div className="bg-slate-50 rounded-lg p-3 mb-3">
-                  <p className="text-sm text-slate-600 italic">{entry.prompt}</p>
+              <h3 className="text-lg font-semibold text-slate-900">Daily Reflection Prompts</h3>
+            </div>
+            
+            <p className="text-slate-600 mb-4 text-sm leading-relaxed">
+              Use these prompts to check in with yourself each day. Choose what resonates.
+            </p>
+
+            <div className="space-y-3">
+              {dailyPrompts.map((prompt, idx) => (
+                <div key={idx} className="bg-slate-50 rounded-lg p-4 border-l-4 border-blue-400">
+                  <p className="text-slate-700 text-sm">{prompt}</p>
                 </div>
-              )}
-              
-              <p className="text-slate-700 whitespace-pre-wrap leading-relaxed">{entry.content}</p>
+              ))}
             </div>
-          ))}
-        </div>
-      )}
-
-      {/* Daily Reflection Section */}
-      <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-700">
-            📝
           </div>
-          <h3 className="text-slate-800">Daily Reflection Prompts</h3>
-        </div>
-        
-        <p className="text-slate-600 mb-4 leading-relaxed">
-          Use these prompts to check in with yourself each day. You don't need to answer all of them—choose what resonates.
-        </p>
 
-        <div className="space-y-3">
-          {dailyPrompts.map((prompt, idx) => (
-            <div key={idx} className="bg-slate-50 rounded-lg p-4 border-l-4 border-blue-400">
-              <p className="text-slate-700">{prompt}</p>
+          {/* Weekly Prompts */}
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700">
+                📅
+              </div>
+              <h3 className="text-lg font-semibold text-slate-900">Weekly Reflection Prompts</h3>
             </div>
-          ))}
-        </div>
+            
+            <p className="text-slate-600 mb-4 text-sm leading-relaxed">
+              At the end of each week, take 20-30 minutes to reflect more deeply.
+            </p>
 
-        <div className="mt-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg">
-          <h4 className="text-slate-800 mb-2">Today's Affirmation or Visualization Focus</h4>
-          <p className="text-slate-600 italic">Write or speak one affirmation that feels true for you today. Return to it throughout the day.</p>
-        </div>
-      </div>
-
-      {/* Weekly Reflection Section */}
-      <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700">
-            📅
+            <div className="space-y-3">
+              {weeklyPrompts.map((prompt, idx) => (
+                <div key={idx} className="bg-slate-50 rounded-lg p-4 border-l-4 border-indigo-400">
+                  <p className="text-slate-700 text-sm">{prompt}</p>
+                </div>
+              ))}
+            </div>
           </div>
-          <h3 className="text-slate-800">Weekly Reflection Prompts</h3>
-        </div>
-        
-        <p className="text-slate-600 mb-4 leading-relaxed">
-          At the end of each week, take 20-30 minutes to reflect more deeply. Look back at your daily entries if you kept them.
-        </p>
 
-        <div className="space-y-3">
-          {weeklyPrompts.map((prompt, idx) => (
-            <div key={idx} className="bg-slate-50 rounded-lg p-4 border-l-4 border-indigo-400">
-              <p className="text-slate-700">{prompt}</p>
+          {/* Affirmations */}
+          <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 shadow-sm border border-blue-200">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white">
+                ✦
+              </div>
+              <h3 className="text-lg font-semibold text-slate-900">Affirmations for Recovery</h3>
             </div>
-          ))}
-        </div>
-      </div>
+            
+            <p className="text-slate-600 mb-4 text-sm leading-relaxed">
+              Choose one each morning to carry with you. Speak them with feeling and conviction.
+            </p>
 
-      {/* Affirmations Section */}
-      <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 shadow-sm border border-blue-200">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white">
-            ✦
+            <div className="grid gap-3">
+              {affirmations.map((affirmation, idx) => (
+                <div key={idx} className="bg-white rounded-lg p-4 shadow-sm border border-blue-100">
+                  <p className="text-slate-700 text-sm italic">"{affirmation}"</p>
+                </div>
+              ))}
+            </div>
           </div>
-          <h3 className="text-slate-800">Affirmations for Recovery & Healing</h3>
+
+          {/* Journaling Tips */}
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+            <h3 className="text-lg font-semibold text-slate-900 mb-3">💡 Gentle Journaling Guidance</h3>
+            <ul className="space-y-3 text-sm text-slate-600">
+              <li className="pl-6 relative before:content-['•'] before:absolute before:left-0 before:text-blue-500">
+                <strong>Write freely.</strong> Don't worry about grammar or structure. Let the words flow.
+              </li>
+              <li className="pl-6 relative before:content-['•'] before:absolute before:left-0 before:text-blue-500">
+                <strong>Be honest.</strong> This is your private space. Write what's true.
+              </li>
+              <li className="pl-6 relative before:content-['•'] before:absolute before:left-0 before:text-blue-500">
+                <strong>Practice self-compassion.</strong> If hard emotions arise, breathe.
+              </li>
+              <li className="pl-6 relative before:content-['•'] before:absolute before:left-0 before:text-blue-500">
+                <strong>Take breaks.</strong> Pause if it feels overwhelming.
+              </li>
+              <li className="pl-6 relative before:content-['•'] before:absolute before:left-0 before:text-blue-500">
+                <strong>Celebrate progress.</strong> Every step matters.
+              </li>
+            </ul>
+          </div>
         </div>
-        
-        <p className="text-slate-600 mb-4 leading-relaxed">
-          These affirmations blend 12-Step principles, trauma recovery wisdom, and subconscious mind work. 
-          Choose one each morning to carry with you, or use several throughout the day. Speak them with feeling and conviction.
-        </p>
-
-        <div className="grid sm:grid-cols-2 gap-3">
-          {affirmations.map((affirmation, idx) => (
-            <div key={idx} className="bg-white rounded-lg p-4 shadow-sm border border-blue-100">
-              <p className="text-slate-700 italic">"{affirmation}"</p>
-            </div>
-          ))}
-        </div>
       </div>
+    );
+  }
 
-      {/* Journaling Tips */}
-      <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
-        <h3 className="text-slate-800 mb-3">💡 Gentle Journaling Guidance</h3>
-        <ul className="space-y-2 text-slate-600">
-          <li className="pl-6 relative before:content-['•'] before:absolute before:left-0 before:text-blue-500">
-            <strong>Write freely.</strong> Don't worry about grammar, structure, or "doing it right." Let the words flow.
-          </li>
-          <li className="pl-6 relative before:content-['•'] before:absolute before:left-0 before:text-blue-500">
-            <strong>Be honest.</strong> This is your private space. Write what's true, even if it's difficult.
-          </li>
-          <li className="pl-6 relative before:content-['•'] before:absolute before:left-0 before:text-blue-500">
-            <strong>Practice self-compassion.</strong> If hard emotions arise, breathe. You're not doing anything wrong.
-          </li>
-          <li className="pl-6 relative before:content-['•'] before:absolute before:left-0 before:text-blue-500">
-            <strong>Take breaks.</strong> If it feels overwhelming, pause. Return when you're ready.
-          </li>
-          <li className="pl-6 relative before:content-['•'] before:absolute before:left-0 before:text-blue-500">
-            <strong>Celebrate progress.</strong> Notice small shifts. Healing isn't linear, and every step matters.
-          </li>
-          <li className="pl-6 relative before:content-['•'] before:absolute before:left-0 before:text-blue-500">
-            <strong>Use other formats.</strong> If writing feels hard, try voice notes, art, or movement. Expression takes many forms.
-          </li>
-        </ul>
-      </div>
-
-      {/* Closing Note */}
-      <div className="bg-gradient-to-br from-slate-50 to-blue-50 rounded-xl p-8 border border-slate-200">
-        <p className="text-slate-700 leading-relaxed text-center italic">
-          "Your story is sacred. Your healing matters. Every word you write is an act of courage and self-love. 
-          Keep going, Cole. You are not alone on this path."
-        </p>
-      </div>
-    </div>
-  );
+  return null;
 }

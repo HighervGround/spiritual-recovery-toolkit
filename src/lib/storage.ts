@@ -2,6 +2,7 @@
 
 export interface JournalEntry {
   id: string;
+  title: string;
   date: string;
   prompt: string;
   content: string;
@@ -135,4 +136,5 @@ export const storage = {
     }
   },
 };
+
 

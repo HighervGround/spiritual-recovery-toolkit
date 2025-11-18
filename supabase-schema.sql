@@ -32,6 +32,7 @@ CREATE POLICY "Users can insert own profile"
 CREATE TABLE IF NOT EXISTS public.journal_entries (
   id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
   user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+  title TEXT DEFAULT '',
   date TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   prompt TEXT,
   content TEXT NOT NULL,
@@ -179,4 +180,5 @@ CREATE TRIGGER on_auth_user_created
 GRANT USAGE ON SCHEMA public TO anon, authenticated;
 GRANT ALL ON ALL TABLES IN SCHEMA public TO anon, authenticated;
 GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO anon, authenticated;
+
 

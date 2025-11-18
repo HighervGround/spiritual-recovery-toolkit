@@ -110,3 +110,4 @@ The app automatically detects which mode to use!
 
 **Remember**: Your `.env` file contains sensitive credentials. Never commit it to git!
 
+
