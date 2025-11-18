@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Check, Edit2, Save, X, ChevronDown, ChevronUp } from 'lucide-react';
-import { storage, WeekProgress } from '../lib/storage';
+import { WeekProgress } from '../lib/storage';
+import type { StorageBackend } from '../lib/storageBackend';
 
 interface Week {
   number: number;
@@ -123,15 +124,24 @@ const weeklyPlan: Week[] = [
   }
 ];
 
-export function WeeklyPlan() {
+interface WeeklyPlanProps {
+  storage: StorageBackend;
+}
+
+export function WeeklyPlan({ storage }: WeeklyPlanProps) {
   const [weekProgress, setWeekProgress] = useState<WeekProgress[]>([]);
   const [expandedWeek, setExpandedWeek] = useState<number | null>(null);
   const [editingNotes, setEditingNotes] = useState<number | null>(null);
   const [currentNotes, setCurrentNotes] = useState('');
 
+  const loadWeekProgress = useCallback(async () => {
+    const progress = await storage.getWeekProgress();
+    setWeekProgress(progress);
+  }, [storage]);
+
   useEffect(() => {
-    setWeekProgress(storage.getWeekProgress());
-  }, []);
+    loadWeekProgress();
+  }, [loadWeekProgress]);
 
   const getWeekProgress = (weekNumber: number): WeekProgress => {
     return weekProgress.find(w => w.weekNumber === weekNumber) || {
@@ -142,10 +152,10 @@ export function WeeklyPlan() {
     };
   };
 
-  const toggleWeekComplete = (weekNumber: number) => {
+  const toggleWeekComplete = async (weekNumber: number) => {
     const current = getWeekProgress(weekNumber);
-    storage.updateWeekProgress(weekNumber, { completed: !current.completed });
-    setWeekProgress(storage.getWeekProgress());
+    await storage.updateWeekProgress(weekNumber, { completed: !current.completed });
+    await loadWeekProgress();
   };
 
   const toggleWeek = (weekNumber: number) => {
@@ -158,9 +168,9 @@ export function WeeklyPlan() {
     setEditingNotes(weekNumber);
   };
 
-  const saveNotes = (weekNumber: number) => {
-    storage.updateWeekProgress(weekNumber, { notes: currentNotes });
-    setWeekProgress(storage.getWeekProgress());
+  const saveNotes = async (weekNumber: number) => {
+    await storage.updateWeekProgress(weekNumber, { notes: currentNotes });
+    await loadWeekProgress();
     setEditingNotes(null);
     setCurrentNotes('');
   };

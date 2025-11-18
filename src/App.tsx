@@ -7,6 +7,7 @@ import { BookOpen, Calendar, NotebookPen, Download, Upload, Settings, Trash2, X,
 import { storage } from './lib/storage';
 import { supabaseStorage } from './lib/supabaseStorage';
 import { supabase } from './lib/supabase';
+import type { StorageBackend } from './lib/storageBackend';
 
 export default function App() {
   const [activeSection, setActiveSection] = useState<'workbook' | 'plan' | 'journal'>('workbook');
@@ -17,7 +18,7 @@ export default function App() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Get the appropriate storage based on mode
-  const storageBackend = useSupabase ? supabaseStorage : storage;
+  const storageBackend: StorageBackend = useSupabase ? supabaseStorage : storage;
 
   // Check for Supabase configuration and auth state
   useEffect(() => {
