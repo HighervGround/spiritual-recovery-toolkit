@@ -15,6 +15,7 @@ export interface StepProgress {
   stepNumber: number;
   completed: boolean;
   notes: string;
+  reflectionAnswers: { [question: string]: string };
   lastUpdated: string;
 }
 

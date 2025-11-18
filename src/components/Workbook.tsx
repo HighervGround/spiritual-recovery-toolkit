@@ -689,13 +689,26 @@ export function Workbook() {
                 {/* Reflection Questions */}
                 <div>
                   <h4 className="text-slate-800 mb-3">Reflection Questions</h4>
-                  <ul className="space-y-2">
-                    {step.reflectionQuestions.map((question, idx) => (
-                      <li key={idx} className="text-slate-600 pl-6 relative before:content-['•'] before:absolute before:left-0 before:text-blue-500">
-                        {question}
-                      </li>
-                    ))}
-                  </ul>
+                  <div className="space-y-4">
+                    {step.reflectionQuestions.map((question, idx) => {
+                      const answer = progress.reflectionAnswers?.[question] || '';
+                      return (
+                        <div key={idx} className="bg-slate-50 rounded-lg p-4 border border-slate-200">
+                          <p className="text-slate-700 mb-2 font-medium">{question}</p>
+                          <textarea
+                            value={answer}
+                            onChange={(e) => {
+                              const newAnswers = { ...progress.reflectionAnswers, [question]: e.target.value };
+                              storage.updateStepProgress(step.number, { reflectionAnswers: newAnswers });
+                              setStepProgress(storage.getStepProgress());
+                            }}
+                            placeholder="Write your reflection here..."
+                            className="w-full min-h-[80px] px-3 py-2 rounded border border-slate-300 text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y bg-white"
+                          />
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
 
                 {/* Joseph Murphy Practices */}

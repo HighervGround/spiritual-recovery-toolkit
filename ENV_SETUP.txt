@@ -17,3 +17,4 @@ https://app.supabase.com/project/_/settings/api
 If you don't set up Supabase, the app will automatically use localStorage instead.
 
 
+

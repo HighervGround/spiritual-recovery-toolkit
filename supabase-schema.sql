@@ -68,6 +68,7 @@ CREATE TABLE IF NOT EXISTS public.step_progress (
   step_number INTEGER NOT NULL CHECK (step_number >= 1 AND step_number <= 12),
   completed BOOLEAN DEFAULT FALSE,
   notes TEXT DEFAULT '',
+  reflection_answers JSONB DEFAULT '{}'::jsonb,
   last_updated TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   UNIQUE(user_id, step_number)

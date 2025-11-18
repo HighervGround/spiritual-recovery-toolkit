@@ -68,35 +68,38 @@ export interface Database {
           updated_at?: string;
         };
       };
-      step_progress: {
-        Row: {
-          id: string;
-          user_id: string;
-          step_number: number;
-          completed: boolean;
-          notes: string;
-          last_updated: string;
-          created_at: string;
-        };
-        Insert: {
-          id?: string;
-          user_id: string;
-          step_number: number;
-          completed?: boolean;
-          notes?: string;
-          last_updated?: string;
-          created_at?: string;
-        };
-        Update: {
-          id?: string;
-          user_id?: string;
-          step_number?: number;
-          completed?: boolean;
-          notes?: string;
-          last_updated?: string;
-          created_at?: string;
-        };
+    step_progress: {
+      Row: {
+        id: string;
+        user_id: string;
+        step_number: number;
+        completed: boolean;
+        notes: string;
+        reflection_answers: { [key: string]: string };
+        last_updated: string;
+        created_at: string;
       };
+      Insert: {
+        id?: string;
+        user_id: string;
+        step_number: number;
+        completed?: boolean;
+        notes?: string;
+        reflection_answers?: { [key: string]: string };
+        last_updated?: string;
+        created_at?: string;
+      };
+      Update: {
+        id?: string;
+        user_id?: string;
+        step_number?: number;
+        completed?: boolean;
+        notes?: string;
+        reflection_answers?: { [key: string]: string };
+        last_updated?: string;
+        created_at?: string;
+      };
+    };
       weekly_progress: {
         Row: {
           id: string;

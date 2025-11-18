@@ -13,6 +13,7 @@ export interface StepProgress {
   stepNumber: number;
   completed: boolean;
   notes: string;
+  reflectionAnswers: { [question: string]: string };
   lastUpdated: string;
 }
 
@@ -60,6 +61,7 @@ export const storage = {
         stepNumber: i + 1,
         completed: false,
         notes: '',
+        reflectionAnswers: {},
         lastUpdated: new Date().toISOString(),
       })),
       weeklyPlanProgress: {},
