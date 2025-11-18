@@ -182,11 +182,13 @@ export const supabaseStorage = {
       .eq('step_number', stepNumber)
       .single();
 
-    const updateData = {
-      completed: updates.completed,
-      notes: updates.notes,
+    const updateData: any = {
       last_updated: new Date().toISOString(),
     };
+
+    if (updates.completed !== undefined) updateData.completed = updates.completed;
+    if (updates.notes !== undefined) updateData.notes = updates.notes;
+    if (updates.reflectionAnswers !== undefined) updateData.reflection_answers = updates.reflectionAnswers;
 
     if (existing) {
       // Update existing
