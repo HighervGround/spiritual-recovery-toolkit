@@ -376,12 +376,12 @@ export function Journal() {
             <select
               value={selectedPrompt}
               onChange={(e) => setSelectedPrompt(e.target.value)}
-              className="w-full px-4 py-4 rounded-lg border border-slate-300 text-base text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4 bg-white appearance-none"
-              style={{ fontSize: '16px' }}
+              className="w-full px-4 py-4 rounded-lg border-2 border-slate-300 text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4 bg-white"
+              style={{ fontSize: '18px', minHeight: '56px' }}
             >
-              <option value="">Select a prompt...</option>
+              <option value="" style={{ fontSize: '18px' }}>Select a prompt...</option>
               {(entryType === 'daily' ? dailyPrompts : weeklyPrompts).map((prompt, idx) => (
-                <option key={idx} value={prompt}>
+                <option key={idx} value={prompt} style={{ fontSize: '18px' }}>
                   {prompt}
                 </option>
               ))}
