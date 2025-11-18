@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Trash2, Plus, Calendar as CalendarIcon, Edit2, X, Search, ArrowLeft, Check, ChevronRight } from 'lucide-react';
-import { storage, JournalEntry } from '../lib/storage';
+import { JournalEntry } from '../lib/storage';
+import type { StorageBackend } from '../lib/storageBackend';
 
 const dailyPrompts = [
   "How am I feeling physically, emotionally, and spiritually right now?",
@@ -43,7 +44,11 @@ const affirmations = [
 
 type ViewMode = 'list' | 'edit' | 'view' | 'resources';
 
-export function Journal() {
+interface JournalProps {
+  storage: StorageBackend;
+}
+
+export function Journal({ storage }: JournalProps) {
   const [entries, setEntries] = useState<JournalEntry[]>([]);
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [currentEntry, setCurrentEntry] = useState('');
@@ -56,17 +61,18 @@ export function Journal() {
   const [searchQuery, setSearchQuery] = useState('');
   const [showPromptPicker, setShowPromptPicker] = useState(false);
 
+  const loadEntries = useCallback(async () => {
+    const data = await storage.getJournalEntries();
+    setEntries(
+      data.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    );
+  }, [storage]);
+
   useEffect(() => {
     loadEntries();
-  }, []);
+  }, [loadEntries]);
 
-  const loadEntries = () => {
-    setEntries(storage.getJournalEntries().sort((a, b) => 
-      new Date(b.date).getTime() - new Date(a.date).getTime()
-    ));
-  };
-
-  const handleSaveEntry = () => {
+  const handleSaveEntry = async () => {
     if (!currentEntry.trim()) return;
 
     const entry: JournalEntry = {
@@ -78,8 +84,8 @@ export function Journal() {
       type: entryType,
     };
 
-    storage.saveJournalEntry(entry);
-    loadEntries();
+    await storage.saveJournalEntry(entry);
+    await loadEntries();
     resetEditor();
     setViewMode('list');
   };
@@ -99,10 +105,10 @@ export function Journal() {
     setViewMode('view');
   };
 
-  const handleDeleteEntry = (id: string) => {
+  const handleDeleteEntry = async (id: string) => {
     if (confirm('Are you sure you want to delete this note?')) {
-      storage.deleteJournalEntry(id);
-      loadEntries();
+      await storage.deleteJournalEntry(id);
+      await loadEntries();
       if (selectedEntry?.id === id) {
         setViewMode('list');
       }

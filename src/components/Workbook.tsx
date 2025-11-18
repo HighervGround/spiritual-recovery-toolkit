@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { ChevronDown, ChevronUp, Check, Edit2, Save, X } from 'lucide-react';
-import { storage, StepProgress } from '../lib/storage';
+import { StepProgress } from '../lib/storage';
+import type { StorageBackend } from '../lib/storageBackend';
 
 interface Step {
   number: number;
@@ -491,15 +492,24 @@ const steps: Step[] = [
   }
 ];
 
-export function Workbook() {
+interface WorkbookProps {
+  storage: StorageBackend;
+}
+
+export function Workbook({ storage }: WorkbookProps) {
   const [expandedStep, setExpandedStep] = useState<number | null>(null);
   const [stepProgress, setStepProgress] = useState<StepProgress[]>([]);
   const [editingNotes, setEditingNotes] = useState<number | null>(null);
   const [currentNotes, setCurrentNotes] = useState('');
 
+  const loadStepProgress = useCallback(async () => {
+    const progress = await storage.getStepProgress();
+    setStepProgress(progress);
+  }, [storage]);
+
   useEffect(() => {
-    setStepProgress(storage.getStepProgress());
-  }, []);
+    loadStepProgress();
+  }, [loadStepProgress]);
 
   const toggleStep = (stepNumber: number) => {
     setExpandedStep(expandedStep === stepNumber ? null : stepNumber);
@@ -510,14 +520,15 @@ export function Workbook() {
       stepNumber,
       completed: false,
       notes: '',
+      reflectionAnswers: {},
       lastUpdated: new Date().toISOString(),
     };
   };
 
-  const toggleStepComplete = (stepNumber: number) => {
+  const toggleStepComplete = async (stepNumber: number) => {
     const current = getStepProgress(stepNumber);
-    storage.updateStepProgress(stepNumber, { completed: !current.completed });
-    setStepProgress(storage.getStepProgress());
+    await storage.updateStepProgress(stepNumber, { completed: !current.completed });
+    await loadStepProgress();
   };
 
   const startEditingNotes = (stepNumber: number) => {
@@ -526,9 +537,9 @@ export function Workbook() {
     setEditingNotes(stepNumber);
   };
 
-  const saveNotes = (stepNumber: number) => {
-    storage.updateStepProgress(stepNumber, { notes: currentNotes });
-    setStepProgress(storage.getStepProgress());
+  const saveNotes = async (stepNumber: number) => {
+    await storage.updateStepProgress(stepNumber, { notes: currentNotes });
+    await loadStepProgress();
     setEditingNotes(null);
     setCurrentNotes('');
   };
@@ -536,6 +547,16 @@ export function Workbook() {
   const cancelEditingNotes = () => {
     setEditingNotes(null);
     setCurrentNotes('');
+  };
+
+  const handleReflectionChange = async (stepNumber: number, question: string, value: string) => {
+    const current = getStepProgress(stepNumber);
+    const newAnswers = {
+      ...current.reflectionAnswers,
+      [question]: value,
+    };
+    await storage.updateStepProgress(stepNumber, { reflectionAnswers: newAnswers });
+    await loadStepProgress();
   };
 
   const completedCount = stepProgress.filter(s => s.completed).length;
@@ -698,9 +719,7 @@ export function Workbook() {
                           <textarea
                             value={answer}
                             onChange={(e) => {
-                              const newAnswers = { ...progress.reflectionAnswers, [question]: e.target.value };
-                              storage.updateStepProgress(step.number, { reflectionAnswers: newAnswers });
-                              setStepProgress(storage.getStepProgress());
+                              handleReflectionChange(step.number, question, e.target.value);
                             }}
                             placeholder="Write your reflection here..."
                             className="w-full min-h-[80px] px-3 py-2 rounded border border-slate-300 text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y bg-white"
