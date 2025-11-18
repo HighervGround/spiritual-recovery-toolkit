@@ -576,10 +576,7 @@ export function Workbook() {
               }`}
             >
               {/* Step Header */}
-              <button
-                onClick={() => toggleStep(step.number)}
-                className="w-full px-6 py-5 flex items-start justify-between gap-4 text-left hover:bg-slate-50 transition-colors"
-              >
+              <div className="w-full px-6 py-5 flex items-start justify-between gap-4">
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-2">
                     <button
@@ -602,14 +599,24 @@ export function Workbook() {
                       </span>
                     )}
                   </div>
-                  <p className="text-slate-600 italic">{step.title}</p>
+                  <button
+                    onClick={() => toggleStep(step.number)}
+                    className="text-left hover:opacity-80 transition-opacity w-full"
+                  >
+                    <p className="text-slate-600 italic">{step.title}</p>
+                  </button>
                 </div>
-                {expandedStep === step.number ? (
-                  <ChevronUp className="w-5 h-5 text-slate-400 shrink-0 mt-1" />
-                ) : (
-                  <ChevronDown className="w-5 h-5 text-slate-400 shrink-0 mt-1" />
-                )}
-              </button>
+                <button
+                  onClick={() => toggleStep(step.number)}
+                  className="hover:bg-slate-100 p-2 rounded-lg transition-colors"
+                >
+                  {expandedStep === step.number ? (
+                    <ChevronUp className="w-5 h-5 text-slate-400" />
+                  ) : (
+                    <ChevronDown className="w-5 h-5 text-slate-400" />
+                  )}
+                </button>
+              </div>
 
               {/* Expanded Content */}
               {expandedStep === step.number && (
