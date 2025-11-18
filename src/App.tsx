@@ -141,80 +141,80 @@ export default function App() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
       {/* Header */}
       <header className="bg-white/80 backdrop-blur-sm border-b border-slate-200 sticky top-0 z-10">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6">
-          <div className="flex items-center justify-between mb-6">
+        <div className="max-w-6xl mx-auto px-3 sm:px-6 py-2 sm:py-3">
+          <div className="flex items-center justify-between mb-2 sm:mb-3">
             <div>
-              <h1 className="text-slate-800">
-                Cole's Spiritual Recovery Toolkit
+              <h1 className="text-base sm:text-lg font-semibold text-slate-800">
+                Cole's Spiritual<br className="sm:hidden" /> Recovery Toolkit
               </h1>
               {useSupabase && user && (
-                <p className="text-sm text-slate-500 mt-1">
-                  <Cloud className="w-4 h-4 inline mr-1" />
+                <p className="text-xs text-slate-500 mt-0.5">
+                  <Cloud className="w-3 h-3 inline mr-1" />
                   Synced to cloud
                 </p>
               )}
               {!useSupabase && (
-                <p className="text-sm text-slate-500 mt-1">
-                  <HardDrive className="w-4 h-4 inline mr-1" />
+                <p className="text-xs text-slate-500 mt-0.5">
+                  <HardDrive className="w-3 h-3 inline mr-1" />
                   Local storage
                 </p>
               )}
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-1 sm:gap-2">
               {useSupabase && user && (
                 <button
                   onClick={handleSignOut}
-                  className="flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors"
+                  className="flex items-center gap-1 px-2 py-1.5 sm:px-3 sm:py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors text-xs sm:text-sm"
                 >
-                  <LogOut className="w-5 h-5" />
+                  <LogOut className="w-4 h-4" />
                   <span className="hidden sm:inline">Sign Out</span>
                 </button>
               )}
               <button
                 onClick={() => setShowSettings(!showSettings)}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors"
+                className="flex items-center gap-1 px-2 py-1.5 sm:px-3 sm:py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors text-xs sm:text-sm"
               >
-                <Settings className="w-5 h-5" />
+                <Settings className="w-4 h-4" />
                 <span className="hidden sm:inline">Settings</span>
               </button>
             </div>
           </div>
           
           {/* Navigation */}
-          <nav className="flex flex-col sm:flex-row gap-3 justify-center">
+          <nav className="flex flex-col sm:flex-row gap-2 justify-center">
             <button
               onClick={() => setActiveSection('workbook')}
-              className={`flex items-center justify-center gap-2 px-6 py-3 rounded-lg transition-all ${
+              className={`flex items-center justify-center gap-1.5 px-3 py-2 sm:px-4 sm:py-2.5 rounded-lg transition-all text-sm ${
                 activeSection === 'workbook'
                   ? 'bg-blue-600 text-white shadow-lg'
                   : 'bg-white text-slate-700 hover:bg-slate-50 border border-slate-200'
               }`}
             >
-              <BookOpen className="w-5 h-5" />
+              <BookOpen className="w-4 h-4" />
               <span>🧘‍♂️ Twelve-Step Workbook</span>
             </button>
             
             <button
               onClick={() => setActiveSection('plan')}
-              className={`flex items-center justify-center gap-2 px-6 py-3 rounded-lg transition-all ${
+              className={`flex items-center justify-center gap-1.5 px-3 py-2 sm:px-4 sm:py-2.5 rounded-lg transition-all text-sm ${
                 activeSection === 'plan'
                   ? 'bg-blue-600 text-white shadow-lg'
                   : 'bg-white text-slate-700 hover:bg-slate-50 border border-slate-200'
               }`}
             >
-              <Calendar className="w-5 h-5" />
+              <Calendar className="w-4 h-4" />
               <span>🗓️ 12-Week Plan</span>
             </button>
             
             <button
               onClick={() => setActiveSection('journal')}
-              className={`flex items-center justify-center gap-2 px-6 py-3 rounded-lg transition-all ${
+              className={`flex items-center justify-center gap-1.5 px-3 py-2 sm:px-4 sm:py-2.5 rounded-lg transition-all text-sm ${
                 activeSection === 'journal'
                   ? 'bg-blue-600 text-white shadow-lg'
                   : 'bg-white text-slate-700 hover:bg-slate-50 border border-slate-200'
               }`}
             >
-              <NotebookPen className="w-5 h-5" />
+              <NotebookPen className="w-4 h-4" />
               <span>📔 Spiritual Journal</span>
             </button>
           </nav>
