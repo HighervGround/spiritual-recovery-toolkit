@@ -139,90 +139,8 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
-      {/* Header - Desktop */}
-      <header className="hidden lg:block bg-white/80 backdrop-blur-sm border-b border-slate-200 sticky top-0 z-10">
-        <div className="max-w-6xl mx-auto px-6 py-3">
-          <div className="flex items-center justify-between mb-3">
-            <div>
-              <h1 className="text-lg font-semibold text-slate-800">
-                Cole's Spiritual Recovery Toolkit
-              </h1>
-              {useSupabase && user && (
-                <p className="text-xs text-slate-500 mt-0.5">
-                  <Cloud className="w-3 h-3 inline mr-1" />
-                  Synced to cloud
-                </p>
-              )}
-              {!useSupabase && (
-                <p className="text-xs text-slate-500 mt-0.5">
-                  <HardDrive className="w-3 h-3 inline mr-1" />
-                  Local storage
-                </p>
-              )}
-            </div>
-            <div className="flex gap-2">
-              {useSupabase && user && (
-                <button
-                  onClick={handleSignOut}
-                  className="flex items-center gap-1 px-3 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors text-sm"
-                >
-                  <LogOut className="w-4 h-4" />
-                  <span>Sign Out</span>
-                </button>
-              )}
-              <button
-                onClick={() => setShowSettings(!showSettings)}
-                className="flex items-center gap-1 px-3 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors text-sm"
-              >
-                <Settings className="w-4 h-4" />
-                <span>Settings</span>
-              </button>
-            </div>
-          </div>
-          
-          {/* Navigation */}
-          <nav className="flex gap-2 justify-center">
-            <button
-              onClick={() => setActiveSection('workbook')}
-              className={`flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-lg transition-all text-sm ${
-                activeSection === 'workbook'
-                  ? 'bg-blue-600 text-white shadow-lg'
-                  : 'bg-white text-slate-700 hover:bg-slate-50 border border-slate-200'
-              }`}
-            >
-              <BookOpen className="w-4 h-4" />
-              <span>🧘‍♂️ Twelve-Step Workbook</span>
-            </button>
-            
-            <button
-              onClick={() => setActiveSection('plan')}
-              className={`flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-lg transition-all text-sm ${
-                activeSection === 'plan'
-                  ? 'bg-blue-600 text-white shadow-lg'
-                  : 'bg-white text-slate-700 hover:bg-slate-50 border border-slate-200'
-              }`}
-            >
-              <Calendar className="w-4 h-4" />
-              <span>🗓️ 12-Week Plan</span>
-            </button>
-            
-            <button
-              onClick={() => setActiveSection('journal')}
-              className={`flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-lg transition-all text-sm ${
-                activeSection === 'journal'
-                  ? 'bg-blue-600 text-white shadow-lg'
-                  : 'bg-white text-slate-700 hover:bg-slate-50 border border-slate-200'
-              }`}
-            >
-              <NotebookPen className="w-4 h-4" />
-              <span>📔 Spiritual Journal</span>
-            </button>
-          </nav>
-        </div>
-      </header>
-
-      {/* Header - Mobile (minimal) */}
-      <header className="lg:hidden bg-white/80 backdrop-blur-sm border-b border-slate-200 sticky top-0 z-10">
+      {/* Header */}
+      <header className="bg-white/80 backdrop-blur-sm border-b border-slate-200 sticky top-0 z-10">
         <div className="flex items-center justify-between px-3 py-2">
           <div className="flex items-center gap-2">
             <h1 className="text-sm font-semibold text-slate-800">
@@ -254,8 +172,8 @@ export default function App() {
         </div>
       </header>
 
-      {/* Bottom Navigation - Mobile Only */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-slate-200 z-20">
+      {/* Bottom Navigation */}
+      <nav className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-slate-200 z-20">
         <div className="flex justify-around items-center h-16">
           <button
             onClick={() => setActiveSection('workbook')}
@@ -395,7 +313,7 @@ export default function App() {
       )}
 
       {/* Main Content */}
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-4 lg:py-8 pb-20 lg:pb-8">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-4 pb-20">
         {activeSection === 'workbook' && <Workbook storage={storageBackend} />}
         {activeSection === 'plan' && <WeeklyPlan storage={storageBackend} />}
         {activeSection === 'journal' && <Journal storage={storageBackend} />}
