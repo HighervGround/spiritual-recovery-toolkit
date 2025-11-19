@@ -501,8 +501,7 @@ export function Workbook({ storage }: WorkbookProps) {
   const [stepProgress, setStepProgress] = useState<StepProgress[]>([]);
   const [editingNotes, setEditingNotes] = useState<number | null>(null);
   const [currentNotes, setCurrentNotes] = useState('');
-  const [reflectionDrafts, setReflectionDrafts] = useState<{ [key: string]: string }>({});
-  const saveTimeouts = useState(new Map<string, NodeJS.Timeout>())[0];
+  const [editingReflections, setEditingReflections] = useState<{ [key: string]: string }>({});
 
   const loadStepProgress = useCallback(async () => {
     const progress = await storage.getStepProgress();
@@ -551,34 +550,38 @@ export function Workbook({ storage }: WorkbookProps) {
     setCurrentNotes('');
   };
 
-  const handleReflectionChange = (stepNumber: number, question: string, value: string) => {
+  const handleReflectionEdit = (stepNumber: number, question: string, value: string) => {
     const key = `${stepNumber}-${question}`;
+    setEditingReflections(prev => ({ ...prev, [key]: value }));
+  };
+
+  const saveReflection = async (stepNumber: number, question: string) => {
+    const key = `${stepNumber}-${question}`;
+    const value = editingReflections[key];
+    if (value === undefined) return;
+
+    const current = getStepProgress(stepNumber);
+    const newAnswers = {
+      ...current.reflectionAnswers,
+      [question]: value,
+    };
+    await storage.updateStepProgress(stepNumber, { reflectionAnswers: newAnswers });
+    await loadStepProgress();
     
-    // Update local draft immediately for responsive typing
-    setReflectionDrafts(prev => ({ ...prev, [key]: value }));
-    
-    // Debounce the save to prevent too many updates
-    const existingTimeout = saveTimeouts.get(key);
-    if (existingTimeout) {
-      clearTimeout(existingTimeout);
-    }
-    
-    const newTimeout = setTimeout(async () => {
-      const current = getStepProgress(stepNumber);
-      const newAnswers = {
-        ...current.reflectionAnswers,
-        [question]: value,
-      };
-      await storage.updateStepProgress(stepNumber, { reflectionAnswers: newAnswers });
-      // Remove from drafts after save
-      setReflectionDrafts(prev => {
-        const updated = { ...prev };
-        delete updated[key];
-        return updated;
-      });
-    }, 500); // Save 500ms after user stops typing
-    
-    saveTimeouts.set(key, newTimeout);
+    // Remove from editing
+    setEditingReflections(prev => {
+      const updated = { ...prev };
+      delete updated[key];
+      return updated;
+    });
+  };
+
+  const cancelReflectionEdit = (key: string) => {
+    setEditingReflections(prev => {
+      const updated = { ...prev };
+      delete updated[key];
+      return updated;
+    });
   };
 
   const completedCount = stepProgress.filter(s => s.completed).length;
@@ -736,23 +739,52 @@ export function Workbook({ storage }: WorkbookProps) {
                     {step.reflectionQuestions.map((question, idx) => {
                       const key = `${step.number}-${question}`;
                       const savedAnswer = progress.reflectionAnswers?.[question] || '';
-                      const draftAnswer = reflectionDrafts[key];
-                      const displayValue = draftAnswer !== undefined ? draftAnswer : savedAnswer;
+                      const isEditing = key in editingReflections;
+                      const displayValue = isEditing ? editingReflections[key] : savedAnswer;
                       
                       return (
                         <div key={idx} className="bg-slate-50 rounded-lg p-4 border border-slate-200">
                           <p className="text-slate-700 mb-2 font-medium text-sm sm:text-base">{question}</p>
-                          <textarea
-                            value={displayValue}
-                            onChange={(e) => {
-                              handleReflectionChange(step.number, question, e.target.value);
-                            }}
-                            placeholder="Write your reflection here..."
-                            className="w-full min-h-[100px] px-3 py-3 rounded border border-slate-300 text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y bg-white"
-                            style={{ fontSize: '16px' }}
-                          />
-                          {draftAnswer !== undefined && (
-                            <p className="text-xs text-slate-500 mt-1">Saving...</p>
+                          
+                          {!isEditing && savedAnswer ? (
+                            <div>
+                              <p className="text-slate-600 whitespace-pre-wrap mb-3">{savedAnswer}</p>
+                              <button
+                                onClick={() => handleReflectionEdit(step.number, question, savedAnswer)}
+                                className="flex items-center gap-1 px-3 py-1.5 text-sm rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+                              >
+                                <Edit2 className="w-3 h-3" />
+                                Edit
+                              </button>
+                            </div>
+                          ) : (
+                            <div>
+                              <textarea
+                                value={displayValue}
+                                onChange={(e) => handleReflectionEdit(step.number, question, e.target.value)}
+                                placeholder="Write your reflection here..."
+                                className="w-full min-h-[100px] px-3 py-3 rounded border border-slate-300 text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y bg-white mb-2"
+                                style={{ fontSize: '16px' }}
+                              />
+                              <div className="flex gap-2">
+                                <button
+                                  onClick={() => saveReflection(step.number, question)}
+                                  className="flex items-center gap-1 px-3 py-1.5 text-sm rounded-lg bg-green-600 text-white hover:bg-green-700 transition-colors"
+                                >
+                                  <Save className="w-3 h-3" />
+                                  Save
+                                </button>
+                                {savedAnswer && (
+                                  <button
+                                    onClick={() => cancelReflectionEdit(key)}
+                                    className="flex items-center gap-1 px-3 py-1.5 text-sm rounded-lg bg-slate-300 text-slate-700 hover:bg-slate-400 transition-colors"
+                                  >
+                                    <X className="w-3 h-3" />
+                                    Cancel
+                                  </button>
+                                )}
+                              </div>
+                            </div>
                           )}
                         </div>
                       );
