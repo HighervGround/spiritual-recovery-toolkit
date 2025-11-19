@@ -769,17 +769,17 @@ export function Workbook({ storage }: WorkbookProps) {
                               <div className="flex gap-2 flex-wrap">
                                 <button
                                   onClick={() => saveReflection(step.number, question)}
-                                  className="flex items-center justify-center gap-2 px-4 py-2.5 text-base rounded-lg bg-green-600 text-white hover:bg-green-700 transition-colors shadow-sm font-medium"
+                                  className="flex items-center justify-center gap-2 px-5 py-3 text-base rounded-lg bg-green-700 text-white hover:bg-green-800 active:bg-green-900 transition-colors shadow-md font-semibold border-2 border-green-800"
                                 >
-                                  <Save className="w-4 h-4" />
+                                  <Save className="w-5 h-5" />
                                   Save Answer
                                 </button>
                                 {savedAnswer && (
                                   <button
                                     onClick={() => cancelReflectionEdit(key)}
-                                    className="flex items-center justify-center gap-2 px-4 py-2.5 text-base rounded-lg bg-slate-300 text-slate-700 hover:bg-slate-400 transition-colors"
+                                    className="flex items-center justify-center gap-2 px-5 py-3 text-base rounded-lg bg-slate-200 text-slate-800 hover:bg-slate-300 active:bg-slate-400 transition-colors border-2 border-slate-400 font-medium"
                                   >
-                                    <X className="w-4 h-4" />
+                                    <X className="w-5 h-5" />
                                     Cancel
                                   </button>
                                 )}
