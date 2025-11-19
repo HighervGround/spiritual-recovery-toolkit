@@ -766,20 +766,20 @@ export function Workbook({ storage }: WorkbookProps) {
                                 className="w-full min-h-[100px] px-3 py-3 rounded border border-slate-300 text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y bg-white mb-2"
                                 style={{ fontSize: '16px' }}
                               />
-                              <div className="flex gap-2">
+                              <div className="flex gap-2 flex-wrap">
                                 <button
                                   onClick={() => saveReflection(step.number, question)}
-                                  className="flex items-center gap-1 px-3 py-1.5 text-sm rounded-lg bg-green-600 text-white hover:bg-green-700 transition-colors"
+                                  className="flex items-center justify-center gap-2 px-4 py-2.5 text-base rounded-lg bg-green-600 text-white hover:bg-green-700 transition-colors shadow-sm font-medium"
                                 >
-                                  <Save className="w-3 h-3" />
-                                  Save
+                                  <Save className="w-4 h-4" />
+                                  Save Answer
                                 </button>
                                 {savedAnswer && (
                                   <button
                                     onClick={() => cancelReflectionEdit(key)}
-                                    className="flex items-center gap-1 px-3 py-1.5 text-sm rounded-lg bg-slate-300 text-slate-700 hover:bg-slate-400 transition-colors"
+                                    className="flex items-center justify-center gap-2 px-4 py-2.5 text-base rounded-lg bg-slate-300 text-slate-700 hover:bg-slate-400 transition-colors"
                                   >
-                                    <X className="w-3 h-3" />
+                                    <X className="w-4 h-4" />
                                     Cancel
                                   </button>
                                 )}
