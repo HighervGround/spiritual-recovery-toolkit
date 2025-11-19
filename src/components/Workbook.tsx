@@ -501,6 +501,8 @@ export function Workbook({ storage }: WorkbookProps) {
   const [stepProgress, setStepProgress] = useState<StepProgress[]>([]);
   const [editingNotes, setEditingNotes] = useState<number | null>(null);
   const [currentNotes, setCurrentNotes] = useState('');
+  const [reflectionDrafts, setReflectionDrafts] = useState<{ [key: string]: string }>({});
+  const saveTimeouts = useState(new Map<string, NodeJS.Timeout>())[0];
 
   const loadStepProgress = useCallback(async () => {
     const progress = await storage.getStepProgress();
@@ -549,14 +551,34 @@ export function Workbook({ storage }: WorkbookProps) {
     setCurrentNotes('');
   };
 
-  const handleReflectionChange = async (stepNumber: number, question: string, value: string) => {
-    const current = getStepProgress(stepNumber);
-    const newAnswers = {
-      ...current.reflectionAnswers,
-      [question]: value,
-    };
-    await storage.updateStepProgress(stepNumber, { reflectionAnswers: newAnswers });
-    await loadStepProgress();
+  const handleReflectionChange = (stepNumber: number, question: string, value: string) => {
+    const key = `${stepNumber}-${question}`;
+    
+    // Update local draft immediately for responsive typing
+    setReflectionDrafts(prev => ({ ...prev, [key]: value }));
+    
+    // Debounce the save to prevent too many updates
+    const existingTimeout = saveTimeouts.get(key);
+    if (existingTimeout) {
+      clearTimeout(existingTimeout);
+    }
+    
+    const newTimeout = setTimeout(async () => {
+      const current = getStepProgress(stepNumber);
+      const newAnswers = {
+        ...current.reflectionAnswers,
+        [question]: value,
+      };
+      await storage.updateStepProgress(stepNumber, { reflectionAnswers: newAnswers });
+      // Remove from drafts after save
+      setReflectionDrafts(prev => {
+        const updated = { ...prev };
+        delete updated[key];
+        return updated;
+      });
+    }, 500); // Save 500ms after user stops typing
+    
+    saveTimeouts.set(key, newTimeout);
   };
 
   const completedCount = stepProgress.filter(s => s.completed).length;
@@ -712,18 +734,26 @@ export function Workbook({ storage }: WorkbookProps) {
                   <h4 className="text-slate-800 mb-3">Reflection Questions</h4>
                   <div className="space-y-4">
                     {step.reflectionQuestions.map((question, idx) => {
-                      const answer = progress.reflectionAnswers?.[question] || '';
+                      const key = `${step.number}-${question}`;
+                      const savedAnswer = progress.reflectionAnswers?.[question] || '';
+                      const draftAnswer = reflectionDrafts[key];
+                      const displayValue = draftAnswer !== undefined ? draftAnswer : savedAnswer;
+                      
                       return (
                         <div key={idx} className="bg-slate-50 rounded-lg p-4 border border-slate-200">
-                          <p className="text-slate-700 mb-2 font-medium">{question}</p>
+                          <p className="text-slate-700 mb-2 font-medium text-sm sm:text-base">{question}</p>
                           <textarea
-                            value={answer}
+                            value={displayValue}
                             onChange={(e) => {
                               handleReflectionChange(step.number, question, e.target.value);
                             }}
                             placeholder="Write your reflection here..."
-                            className="w-full min-h-[80px] px-3 py-2 rounded border border-slate-300 text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y bg-white"
+                            className="w-full min-h-[100px] px-3 py-3 rounded border border-slate-300 text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y bg-white"
+                            style={{ fontSize: '16px' }}
                           />
+                          {draftAnswer !== undefined && (
+                            <p className="text-xs text-slate-500 mt-1">Saving...</p>
+                          )}
                         </div>
                       );
                     })}
