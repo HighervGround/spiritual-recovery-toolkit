@@ -183,103 +183,92 @@ export function WeeklyPlan({ storage }: WeeklyPlanProps) {
   const completedWeeks = weekProgress.filter(w => w.completed).length;
 
   return (
-    <div className="space-y-6">
-      <div className="bg-white rounded-xl p-8 shadow-sm border border-slate-200">
-        <h2 className="text-slate-800 mb-4">🗓️ Cole's 12-Week Spiritual Step Plan</h2>
-        <p className="text-slate-600 leading-relaxed mb-4">
-          This is your flexible, self-guided journey through the 12 Steps over 12 weeks. Steps 1–3 are completed together 
-          in Week 1 to establish foundation. Steps 4 and 9 receive two weeks each for deep work. The final week is for integration 
-          and gratitude.
+    <div>
+      {/* Header */}
+      <div className="px-4 py-6 border-b border-slate-200">
+        <h2 className="text-2xl font-semibold text-black mb-2">12-Week Plan</h2>
+        <p className="text-base text-slate-600 leading-relaxed mb-4">
+          Your flexible, self-guided journey through the 12 Steps over 12 weeks. Steps 1–3 are completed together 
+          in Week 1 to establish foundation. Steps 4 and 9 receive two weeks each for deep work.
         </p>
-        <p className="text-slate-600 leading-relaxed mb-6">
-          Honor your pace. If you need more time with any step, take it. This plan is a guide, not a rule. Be gentle with yourself.
-        </p>
-
+        
         {/* Progress Indicator */}
-        <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
+        <div className="pt-4">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-slate-700">Weekly Progress</span>
-            <span className="text-blue-700">{completedWeeks} of 12 weeks completed</span>
+            <span className="text-sm text-slate-600">Weekly Progress</span>
+            <span className="text-base font-medium text-black">{completedWeeks} of 12</span>
           </div>
-          <div className="w-full bg-white rounded-full h-3 overflow-hidden">
+          <div className="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
             <div 
-              className="bg-gradient-to-r from-blue-500 to-indigo-600 h-full transition-all duration-500"
+              className="bg-blue-600 h-full transition-all duration-500"
               style={{ width: `${(completedWeeks / 12) * 100}%` }}
             />
           </div>
         </div>
       </div>
 
-      <div className="grid gap-4">
+      <div>
         {weeklyPlan.map((week) => {
           const progress = getWeekProgress(week.number);
           const isExpanded = expandedWeek === week.number;
           
           return (
-            <div
-              key={week.number}
-              className={`bg-white rounded-xl shadow-sm border hover:shadow-md transition-shadow ${
-                progress.completed ? 'border-green-300 bg-green-50/30' : 'border-slate-200'
-              }`}
-            >
+            <div key={week.number} className="border-b border-slate-200">
               {/* Week Header */}
               <button
                 onClick={() => toggleWeek(week.number)}
-                className="w-full px-6 py-4 flex items-start justify-between gap-4 text-left hover:bg-slate-50 transition-colors"
+                className="w-full px-4 py-4 flex items-center justify-between active:bg-slate-50"
               >
-                <div className="flex items-start gap-4 flex-1">
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleWeekComplete(week.number);
-                    }}
-                    className={`flex items-center justify-center w-12 h-12 rounded-full shrink-0 transition-colors ${
-                      progress.completed
-                        ? 'bg-green-600 text-white hover:bg-green-700'
-                        : 'bg-gradient-to-br from-blue-500 to-indigo-600 text-white hover:from-blue-600 hover:to-indigo-700'
-                    }`}
-                    title={progress.completed ? 'Mark as incomplete' : 'Mark as complete'}
-                  >
-                    {progress.completed ? <Check className="w-7 h-7" /> : week.number}
-                  </button>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1 flex-wrap">
-                      <h3 className="text-slate-800">Week {week.number}: {week.steps}</h3>
-                      {progress.completed && (
-                        <span className="px-2 py-1 text-xs rounded bg-green-100 text-green-700">
-                          Completed
-                        </span>
-                      )}
-                      {progress.notes && (
-                        <span className="px-2 py-1 text-xs rounded bg-amber-100 text-amber-700">
-                          📝 Notes
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-blue-600 text-sm">{week.theme}</p>
+                <div className="flex items-center gap-3 flex-1 text-left">
+                  <div className={`flex items-center justify-center w-10 h-10 rounded-full shrink-0 ${
+                    progress.completed
+                      ? 'bg-blue-600'
+                      : 'border-2 border-slate-300'
+                  }`}>
+                    {progress.completed ? (
+                      <Check className="w-5 h-5 text-white" />
+                    ) : (
+                      <span className="text-base text-slate-600">{week.number}</span>
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-base font-medium text-black mb-1">Week {week.number}: {week.steps}</h3>
+                    <p className="text-sm text-slate-600 truncate">{week.theme}</p>
                   </div>
                 </div>
                 {isExpanded ? (
-                  <ChevronUp className="w-5 h-5 text-slate-400 shrink-0 mt-1" />
+                  <ChevronUp className="w-5 h-5 text-slate-400 shrink-0" />
                 ) : (
-                  <ChevronDown className="w-5 h-5 text-slate-400 shrink-0 mt-1" />
+                  <ChevronDown className="w-5 h-5 text-slate-400 shrink-0" />
                 )}
               </button>
+              
+              {/* Complete Button */}
+              <div className="px-4 pb-3">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggleWeekComplete(week.number);
+                  }}
+                  className="text-sm text-blue-600 active:opacity-50"
+                >
+                  {progress.completed ? 'Mark as incomplete' : 'Mark as complete'}
+                </button>
+              </div>
 
               {/* Expanded Content */}
               {isExpanded && (
-                <div className="px-6 pb-6 space-y-4 border-t border-slate-100">
+                <div className="px-4 py-4 space-y-4 bg-slate-50">
                   {/* Personal Notes Section */}
-                  <div className="pt-4 bg-amber-50 rounded-lg p-5 border border-amber-200">
+                  <div className="bg-white rounded-lg p-4 border border-slate-200">
                     <div className="flex items-center justify-between mb-3">
-                      <h4 className="text-slate-800">📝 Your Week Notes</h4>
+                      <h4 className="text-base font-medium text-black">Week Notes</h4>
                       {editingNotes !== week.number && (
                         <button
                           onClick={() => startEditingNotes(week.number)}
-                          className="flex items-center gap-2 px-3 py-1.5 text-sm bg-white rounded-lg hover:bg-slate-50 transition-colors border border-slate-200"
+                          className="text-sm text-blue-600 active:opacity-50"
                         >
-                          <Edit2 className="w-4 h-4" />
-                          {progress.notes ? 'Edit' : 'Add Notes'}
+                          {progress.notes ? 'Edit' : 'Add'}
                         </button>
                       )}
                     </div>
@@ -290,67 +279,55 @@ export function WeeklyPlan({ storage }: WeeklyPlanProps) {
                           value={currentNotes}
                           onChange={(e) => setCurrentNotes(e.target.value)}
                           placeholder="Write your personal reflections, progress, insights, or goals for this week..."
-                          className="w-full min-h-[120px] px-4 py-3 rounded-lg border border-slate-300 text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y bg-white"
+                          className="w-full min-h-[120px] px-3 py-3 border-b border-slate-300 text-base text-black focus:outline-none focus:border-blue-600 resize-y bg-white"
+                          style={{ fontSize: '16px' }}
                         />
                         <div className="flex gap-2">
                           <button
                             onClick={() => saveNotes(week.number)}
-                            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                            className="px-4 py-2 bg-blue-600 text-white rounded-lg active:opacity-80 text-sm font-medium"
                           >
-                            <Save className="w-4 h-4" />
                             Save
                           </button>
                           <button
                             onClick={cancelEditingNotes}
-                            className="flex items-center gap-2 px-4 py-2 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 transition-colors"
+                            className="px-4 py-2 text-slate-600 active:opacity-50 text-sm"
                           >
-                            <X className="w-4 h-4" />
                             Cancel
                           </button>
                         </div>
                       </div>
                     ) : progress.notes ? (
-                      <p className="text-slate-700 whitespace-pre-wrap leading-relaxed">{progress.notes}</p>
+                      <p className="text-base text-black whitespace-pre-wrap leading-relaxed">{progress.notes}</p>
                     ) : (
-                      <p className="text-slate-500 italic text-sm">No notes yet. Click "Add Notes" to record your thoughts and progress for this week.</p>
+                      <p className="text-sm text-slate-500">No notes yet.</p>
                     )}
                   </div>
 
                   <div>
-                    <h4 className="text-slate-700 mb-1 text-sm font-semibold">Emotional Focus</h4>
-                    <p className="text-slate-600 text-sm">{week.emotionalFocus}</p>
+                    <h4 className="text-base font-medium text-black mb-2">Emotional Focus</h4>
+                    <p className="text-base text-slate-600 leading-relaxed">{week.emotionalFocus}</p>
                   </div>
 
                   <div>
-                    <h4 className="text-slate-700 mb-1 text-sm font-semibold">Daily Practice</h4>
-                    <p className="text-slate-600 leading-relaxed text-sm">{week.dailyPractice}</p>
+                    <h4 className="text-base font-medium text-black mb-2">Daily Practice</h4>
+                    <p className="text-base text-slate-600 leading-relaxed">{week.dailyPractice}</p>
                   </div>
 
-                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4 border-l-4 border-blue-500">
-                    <h4 className="text-slate-700 mb-1 text-sm font-semibold">This Week's Affirmation</h4>
-                    <p className="text-slate-800 italic text-sm">"{week.affirmation}"</p>
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-blue-600">
+                    <h4 className="text-base font-medium text-black mb-2">This Week's Affirmation</h4>
+                    <p className="text-base text-slate-600 leading-relaxed">"{week.affirmation}"</p>
                   </div>
 
-                  <div className="bg-slate-50 rounded-lg p-4">
-                    <h4 className="text-slate-700 mb-1 text-sm font-semibold">Grounding Exercise</h4>
-                    <p className="text-slate-600 text-sm">{week.grounding}</p>
+                  <div className="bg-white rounded-lg p-4 border border-slate-200">
+                    <h4 className="text-base font-medium text-black mb-2">Grounding Exercise</h4>
+                    <p className="text-base text-slate-600 leading-relaxed">{week.grounding}</p>
                   </div>
                 </div>
               )}
             </div>
           );
         })}
-      </div>
-
-      <div className="bg-gradient-to-br from-indigo-50 to-blue-50 rounded-xl p-8 border border-indigo-200">
-        <h3 className="text-slate-800 mb-3">Moving Forward</h3>
-        <p className="text-slate-600 leading-relaxed mb-4">
-          After Week 12, the journey continues. Recovery is a lifelong practice of awareness, connection, and service. 
-          Return to any step when you need to. Keep practicing the principles. Stay connected to your spiritual center.
-        </p>
-        <p className="text-slate-700 italic">
-          You are not who you were. You are not who you will become. You are here, now, growing—and that is enough.
-        </p>
       </div>
     </div>
   );

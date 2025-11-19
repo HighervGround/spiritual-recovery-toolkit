@@ -587,97 +587,90 @@ export function Workbook({ storage }: WorkbookProps) {
   const completedCount = stepProgress.filter(s => s.completed).length;
 
   return (
-    <div className="space-y-6">
-      <div className="bg-white rounded-xl p-8 shadow-sm border border-slate-200">
-        <h2 className="text-slate-800 mb-4">🧘‍♂️ Cole's Twelve-Step Workbook</h2>
-        <p className="text-slate-600 leading-relaxed mb-4">
-          This workbook is your personal guide through the 12 Steps of recovery. Each step includes modern context, 
-          trauma-informed reflection, deep questions, and Joseph Murphy's subconscious mind practices. Take your time. 
-          Go at your own pace. Return to these pages as often as you need.
+    <div>
+      {/* Header */}
+      <div className="px-4 py-6 border-b border-slate-200">
+        <h2 className="text-2xl font-semibold text-black mb-2">Twelve-Step Workbook</h2>
+        <p className="text-base text-slate-600 leading-relaxed mb-4">
+          Your personal guide through the 12 Steps of recovery. Each step includes modern context, 
+          trauma-informed reflection, deep questions, and Joseph Murphy's subconscious mind practices.
         </p>
         
         {/* Progress Indicator */}
-        <div className="mt-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
+        <div className="pt-4">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-slate-700">Your Progress</span>
-            <span className="text-blue-700">{completedCount} of 12 steps completed</span>
+            <span className="text-sm text-slate-600">Your Progress</span>
+            <span className="text-base font-medium text-black">{completedCount} of 12</span>
           </div>
-          <div className="w-full bg-white rounded-full h-3 overflow-hidden">
+          <div className="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
             <div 
-              className="bg-gradient-to-r from-blue-500 to-indigo-600 h-full transition-all duration-500"
+              className="bg-blue-600 h-full transition-all duration-500"
               style={{ width: `${(completedCount / 12) * 100}%` }}
             />
           </div>
         </div>
       </div>
 
-      <div className="space-y-4">
+      <div>
         {steps.map((step) => {
           const progress = getStepProgress(step.number);
           return (
-            <div
-              key={step.number}
-              className={`bg-white rounded-xl border overflow-hidden shadow-sm hover:shadow-md transition-shadow ${
-                progress.completed ? 'border-green-300 bg-green-50/30' : 'border-slate-200'
-              }`}
-            >
+            <div key={step.number} className="border-b border-slate-200">
               {/* Step Header */}
-              <div className="w-full px-6 py-5 flex items-start justify-between gap-4">
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-2">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toggleStepComplete(step.number);
-                      }}
-                      className={`flex items-center justify-center w-8 h-8 rounded-full shrink-0 transition-colors ${
-                        progress.completed
-                          ? 'bg-green-600 text-white'
-                          : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
-                      }`}
-                    >
-                      {progress.completed ? <Check className="w-5 h-5" /> : step.number}
-                    </button>
-                    <h3 className="text-slate-800">Step {step.number}</h3>
-                    {progress.completed && (
-                      <span className="px-2 py-1 text-xs rounded bg-green-100 text-green-700">
-                        Completed
-                      </span>
+              <button
+                onClick={() => toggleStep(step.number)}
+                className="w-full px-4 py-4 flex items-center justify-between active:bg-slate-50"
+              >
+                <div className="flex items-center gap-3 flex-1 text-left">
+                  <div className={`flex items-center justify-center w-10 h-10 rounded-full shrink-0 ${
+                    progress.completed
+                      ? 'bg-blue-600'
+                      : 'border-2 border-slate-300'
+                  }`}>
+                    {progress.completed ? (
+                      <Check className="w-5 h-5 text-white" />
+                    ) : (
+                      <span className="text-base text-slate-600">{step.number}</span>
                     )}
                   </div>
-                  <button
-                    onClick={() => toggleStep(step.number)}
-                    className="text-left hover:opacity-80 transition-opacity w-full"
-                  >
-                    <p className="text-slate-600 italic">{step.title}</p>
-                  </button>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-base font-medium text-black mb-1">Step {step.number}</h3>
+                    <p className="text-sm text-slate-600 truncate">{step.title}</p>
+                  </div>
                 </div>
+                {expandedStep === step.number ? (
+                  <ChevronUp className="w-5 h-5 text-slate-400 shrink-0" />
+                ) : (
+                  <ChevronDown className="w-5 h-5 text-slate-400 shrink-0" />
+                )}
+              </button>
+              
+              {/* Complete Button */}
+              <div className="px-4 pb-3">
                 <button
-                  onClick={() => toggleStep(step.number)}
-                  className="hover:bg-slate-100 p-2 rounded-lg transition-colors"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggleStepComplete(step.number);
+                  }}
+                  className="text-sm text-blue-600 active:opacity-50"
                 >
-                  {expandedStep === step.number ? (
-                    <ChevronUp className="w-5 h-5 text-slate-400" />
-                  ) : (
-                    <ChevronDown className="w-5 h-5 text-slate-400" />
-                  )}
+                  {progress.completed ? 'Mark as incomplete' : 'Mark as complete'}
                 </button>
               </div>
 
               {/* Expanded Content */}
               {expandedStep === step.number && (
-                <div className="px-6 pb-6 space-y-6 border-t border-slate-100">
+                <div className="px-4 py-4 space-y-6 bg-slate-50">
                   {/* Personal Notes Section */}
-                  <div className="pt-6 bg-amber-50 rounded-lg p-5 border border-amber-200">
+                  <div className="bg-white rounded-lg p-4 border border-slate-200">
                     <div className="flex items-center justify-between mb-3">
-                      <h4 className="text-slate-800">📝 Your Personal Notes</h4>
+                      <h4 className="text-base font-medium text-black">Personal Notes</h4>
                       {editingNotes !== step.number && (
                         <button
                           onClick={() => startEditingNotes(step.number)}
-                          className="flex items-center gap-2 px-3 py-1.5 text-sm bg-white rounded-lg hover:bg-slate-50 transition-colors border border-slate-200"
+                          className="text-sm text-blue-600 active:opacity-50"
                         >
-                          <Edit2 className="w-4 h-4" />
-                          {progress.notes ? 'Edit' : 'Add Notes'}
+                          {progress.notes ? 'Edit' : 'Add'}
                         </button>
                       )}
                     </div>
@@ -688,54 +681,53 @@ export function Workbook({ storage }: WorkbookProps) {
                           value={currentNotes}
                           onChange={(e) => setCurrentNotes(e.target.value)}
                           placeholder="Write your personal reflections, insights, or goals for this step..."
-                          className="w-full min-h-[120px] px-4 py-3 rounded-lg border border-slate-300 text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y bg-white"
+                          className="w-full min-h-[120px] px-3 py-3 border-b border-slate-300 text-base text-black focus:outline-none focus:border-blue-600 resize-y bg-white"
+                          style={{ fontSize: '16px' }}
                         />
                         <div className="flex gap-2">
                           <button
                             onClick={() => saveNotes(step.number)}
-                            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                            className="px-4 py-2 bg-blue-600 text-white rounded-lg active:opacity-80 text-sm font-medium"
                           >
-                            <Save className="w-4 h-4" />
                             Save
                           </button>
                           <button
                             onClick={cancelEditingNotes}
-                            className="flex items-center gap-2 px-4 py-2 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 transition-colors"
+                            className="px-4 py-2 text-slate-600 active:opacity-50 text-sm"
                           >
-                            <X className="w-4 h-4" />
                             Cancel
                           </button>
                         </div>
                       </div>
                     ) : progress.notes ? (
-                      <p className="text-slate-700 whitespace-pre-wrap leading-relaxed">{progress.notes}</p>
+                      <p className="text-base text-black whitespace-pre-wrap leading-relaxed">{progress.notes}</p>
                     ) : (
-                      <p className="text-slate-500 italic">No notes yet. Click "Add Notes" to record your thoughts.</p>
+                      <p className="text-sm text-slate-500">No notes yet.</p>
                     )}
                   </div>
 
                   {/* Modern Overview */}
                   <div>
-                    <h4 className="text-slate-800 mb-2">Modern Overview</h4>
-                    <p className="text-slate-600 leading-relaxed">{step.overview}</p>
+                    <h4 className="text-base font-medium text-black mb-2">Overview</h4>
+                    <p className="text-base text-slate-600 leading-relaxed">{step.overview}</p>
                   </div>
 
                 {/* Core Principle */}
-                <div className="bg-blue-50 rounded-lg p-4">
-                  <h4 className="text-blue-900 mb-2">Core Principle</h4>
-                  <p className="text-blue-800">{step.corePrinciple}</p>
+                <div className="bg-white rounded-lg p-4 border border-slate-200">
+                  <h4 className="text-base font-medium text-black mb-2">Core Principle</h4>
+                  <p className="text-base text-slate-600">{step.corePrinciple}</p>
                 </div>
 
                 {/* Trauma-Informed Reflection */}
                 <div>
-                  <h4 className="text-slate-800 mb-2">Trauma-Informed Reflection</h4>
-                  <p className="text-slate-600 leading-relaxed">{step.traumaInformed}</p>
+                  <h4 className="text-base font-medium text-black mb-2">Trauma-Informed Reflection</h4>
+                  <p className="text-base text-slate-600 leading-relaxed">{step.traumaInformed}</p>
                 </div>
 
                 {/* Reflection Questions */}
                 <div>
-                  <h4 className="text-slate-800 mb-3">Reflection Questions</h4>
-                  <div className="space-y-4">
+                  <h4 className="text-base font-medium text-black mb-3">Reflection Questions</h4>
+                  <div className="space-y-6">
                     {step.reflectionQuestions.map((question, idx) => {
                       const key = `${step.number}-${question}`;
                       const savedAnswer = progress.reflectionAnswers?.[question] || '';
@@ -743,20 +735,17 @@ export function Workbook({ storage }: WorkbookProps) {
                       const displayValue = isEditing ? editingReflections[key] : savedAnswer;
                       
                       return (
-                        <div key={idx} className="bg-white rounded-xl p-5 border-2 border-slate-200 shadow-sm hover:shadow-md transition-shadow">
-                          <p className="text-slate-800 mb-3 font-medium text-base leading-relaxed">{question}</p>
+                        <div key={idx} className="bg-white rounded-lg p-4 border border-slate-200">
+                          <p className="text-base font-medium text-black mb-3 leading-relaxed">{question}</p>
                           
                           {!isEditing && savedAnswer ? (
                             <div>
-                              <div className="bg-blue-50 rounded-lg p-4 mb-3 border-l-4 border-blue-500">
-                                <p className="text-slate-700 whitespace-pre-wrap leading-relaxed">{savedAnswer}</p>
-                              </div>
+                              <p className="text-base text-black whitespace-pre-wrap leading-relaxed mb-3">{savedAnswer}</p>
                               <button
                                 onClick={() => handleReflectionEdit(step.number, question, savedAnswer)}
-                                className="flex items-center gap-1.5 px-3 py-2 text-sm rounded-lg bg-white border-2 border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-blue-500 transition-colors font-medium"
+                                className="text-sm text-blue-600 active:opacity-50"
                               >
-                                <Edit2 className="w-4 h-4" />
-                                Edit Answer
+                                Edit
                               </button>
                             </div>
                           ) : (
@@ -765,23 +754,21 @@ export function Workbook({ storage }: WorkbookProps) {
                                 value={displayValue}
                                 onChange={(e) => handleReflectionEdit(step.number, question, e.target.value)}
                                 placeholder="Write your reflection here..."
-                                className="w-full min-h-[120px] px-4 py-3 rounded-lg border-2 border-slate-300 text-slate-700 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 resize-y bg-white mb-3"
+                                className="w-full min-h-[120px] px-3 py-3 border-b border-slate-300 text-base text-black placeholder-slate-400 focus:outline-none focus:border-blue-600 resize-y bg-white mb-3"
                                 style={{ fontSize: '16px' }}
                               />
-                              <div className="flex gap-2 flex-wrap">
+                              <div className="flex gap-2">
                                 <button
                                   onClick={() => saveReflection(step.number, question)}
-                                  className="flex items-center justify-center gap-1.5 px-4 py-2 text-sm rounded-lg bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800 transition-colors shadow-sm font-semibold"
+                                  className="px-4 py-2 bg-blue-600 text-white rounded-lg active:opacity-80 text-sm font-medium"
                                 >
-                                  <Save className="w-4 h-4" />
-                                  Save Answer
+                                  Save
                                 </button>
                                 {savedAnswer && (
                                   <button
                                     onClick={() => cancelReflectionEdit(key)}
-                                    className="flex items-center justify-center gap-1.5 px-4 py-2 text-sm rounded-lg bg-white border-2 border-slate-300 text-slate-700 hover:bg-slate-50 transition-colors font-medium"
+                                    className="px-4 py-2 text-slate-600 active:opacity-50 text-sm"
                                   >
-                                    <X className="w-4 h-4" />
                                     Cancel
                                   </button>
                                 )}
@@ -795,14 +782,14 @@ export function Workbook({ storage }: WorkbookProps) {
                 </div>
 
                 {/* Joseph Murphy Practices */}
-                <div className="bg-slate-50 rounded-lg p-5 space-y-4">
-                  <h4 className="text-slate-800">Joseph Murphy Practices</h4>
+                <div className="bg-white rounded-lg p-4 border border-slate-200 space-y-4">
+                  <h4 className="text-base font-medium text-black">Joseph Murphy Practices</h4>
 
                   <div>
-                    <h5 className="text-slate-700 mb-2">Daily Affirmations</h5>
-                    <ul className="space-y-1.5">
+                    <h5 className="text-sm font-medium text-black mb-2">Daily Affirmations</h5>
+                    <ul className="space-y-2">
                       {step.murphyPractices.affirmations.map((affirmation, idx) => (
-                        <li key={idx} className="text-slate-600 italic pl-4 relative before:content-['✦'] before:absolute before:left-0 before:text-blue-400">
+                        <li key={idx} className="text-base text-slate-600 pl-4 relative before:content-['•'] before:absolute before:left-0 before:text-slate-400">
                           {affirmation}
                         </li>
                       ))}
@@ -810,35 +797,35 @@ export function Workbook({ storage }: WorkbookProps) {
                   </div>
 
                   <div>
-                    <h5 className="text-slate-700 mb-2">Lullaby Technique</h5>
-                    <p className="text-slate-600 italic">{step.murphyPractices.lullaby}</p>
+                    <h5 className="text-sm font-medium text-black mb-2">Lullaby Technique</h5>
+                    <p className="text-base text-slate-600 leading-relaxed">{step.murphyPractices.lullaby}</p>
                   </div>
 
                   <div>
-                    <h5 className="text-slate-700 mb-2">Visualization</h5>
-                    <p className="text-slate-600">{step.murphyPractices.visualization}</p>
+                    <h5 className="text-sm font-medium text-black mb-2">Visualization</h5>
+                    <p className="text-base text-slate-600 leading-relaxed">{step.murphyPractices.visualization}</p>
                   </div>
 
                   <div>
-                    <h5 className="text-slate-700 mb-2">Revision</h5>
-                    <p className="text-slate-600">{step.murphyPractices.revision}</p>
+                    <h5 className="text-sm font-medium text-black mb-2">Revision</h5>
+                    <p className="text-base text-slate-600 leading-relaxed">{step.murphyPractices.revision}</p>
                   </div>
 
                   <div>
-                    <h5 className="text-slate-700 mb-2">Mental Diet</h5>
-                    <p className="text-slate-600">{step.murphyPractices.mentalDiet}</p>
+                    <h5 className="text-sm font-medium text-black mb-2">Mental Diet</h5>
+                    <p className="text-base text-slate-600 leading-relaxed">{step.murphyPractices.mentalDiet}</p>
                   </div>
 
                   <div>
-                    <h5 className="text-slate-700 mb-2">Self-Concept Work</h5>
-                    <p className="text-slate-600 italic">{step.murphyPractices.selfConcept}</p>
+                    <h5 className="text-sm font-medium text-black mb-2">Self-Concept Work</h5>
+                    <p className="text-base text-slate-600 leading-relaxed">{step.murphyPractices.selfConcept}</p>
                   </div>
                 </div>
 
                 {/* Mini Summary */}
-                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4 border-l-4 border-blue-500">
-                  <h4 className="text-slate-800 mb-2">What Truth Am I Carrying Forward?</h4>
-                  <p className="text-slate-700 italic">{step.miniSummary}</p>
+                <div className="bg-white rounded-lg p-4 border-l-4 border-blue-600">
+                  <h4 className="text-base font-medium text-black mb-2">What Truth Am I Carrying Forward?</h4>
+                  <p className="text-base text-slate-600 leading-relaxed">{step.miniSummary}</p>
                 </div>
                 </div>
               )}

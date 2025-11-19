@@ -175,15 +175,15 @@ export function Journal({ storage }: JournalProps) {
   // List View - iPhone Notes style
   if (viewMode === 'list') {
     return (
-      <div className="min-h-screen bg-slate-50">
+      <div className="min-h-screen bg-white">
         {/* Header */}
         <div className="bg-white border-b border-slate-200 sticky top-0 z-10">
-          <div className="p-3">
-            <div className="flex items-center justify-between mb-2">
-              <h1 className="text-xl font-bold text-slate-900">Notes</h1>
+          <div className="px-4 py-3">
+            <div className="flex items-center justify-between mb-3">
+              <h1 className="text-2xl font-semibold text-black">Notes</h1>
               <button
                 onClick={() => setViewMode('resources')}
-                className="text-xs text-blue-600 hover:text-blue-700 px-2 py-1"
+                className="text-sm text-blue-600 active:opacity-50"
               >
                 Prompts
               </button>
@@ -197,7 +197,7 @@ export function Journal({ storage }: JournalProps) {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search..."
-                className="w-full pl-10 pr-4 py-2 bg-slate-100 border-0 rounded-lg text-sm text-slate-900 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full pl-10 pr-4 py-2 bg-slate-100 border-0 rounded-lg text-sm text-black placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
           </div>
@@ -208,35 +208,35 @@ export function Journal({ storage }: JournalProps) {
           {filteredEntries.length === 0 ? (
             <div className="text-center py-16 px-4">
               <div className="text-6xl mb-4">📝</div>
-              <h3 className="text-lg font-semibold text-slate-900 mb-2">No notes yet</h3>
-              <p className="text-slate-600 mb-6">Start writing your first note</p>
+              <h3 className="text-lg font-semibold text-black mb-2">No notes yet</h3>
+              <p className="text-base text-slate-600 mb-6">Start writing your first note</p>
             </div>
           ) : (
             filteredEntries.map((entry) => (
               <button
                 key={entry.id}
                 onClick={() => handleViewEntry(entry)}
-                className="w-full bg-white hover:bg-slate-50 p-4 text-left transition-colors border-b border-slate-100"
+                className="w-full bg-white active:bg-slate-50 p-4 text-left border-b border-slate-200"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1 flex-wrap">
-                      <h3 className="font-semibold text-slate-900 truncate">
+                      <h3 className="text-base font-medium text-black truncate">
                         {entry.title}
                       </h3>
                       {entry.type !== 'free' && (
-                        <span className="inline-flex items-center px-2 py-0.5 text-xs rounded-full bg-blue-100 text-blue-700 flex-shrink-0">
+                        <span className="text-xs text-slate-500">
                           {entry.type === 'daily' ? 'Daily' : 'Weekly'}
                         </span>
                       )}
                       {entry.prompt && (
-                        <span className="inline-flex items-center px-2 py-0.5 text-xs rounded-full bg-purple-100 text-purple-700 flex-shrink-0">
-                          📝 Prompt
+                        <span className="text-xs text-slate-500">
+                          Prompt
                         </span>
                       )}
                     </div>
                     {entry.prompt && (
-                      <p className="text-xs text-purple-600 italic mb-1 line-clamp-1">
+                      <p className="text-sm text-slate-600 italic mb-1 line-clamp-1">
                         {entry.prompt}
                       </p>
                     )}
@@ -258,7 +258,7 @@ export function Journal({ storage }: JournalProps) {
             resetEditor();
             setViewMode('edit');
           }}
-          className="fixed bottom-6 right-6 w-14 h-14 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg flex items-center justify-center transition-all hover:scale-110"
+          className="fixed bottom-24 right-4 w-12 h-12 bg-blue-600 active:bg-blue-700 text-white rounded-full flex items-center justify-center"
         >
           <Plus className="w-6 h-6" />
         </button>
@@ -305,8 +305,8 @@ export function Journal({ storage }: JournalProps) {
           </p>
           
           {selectedEntry.prompt && (
-            <div className="bg-blue-50 border-l-4 border-blue-500 rounded-lg p-4 mb-6">
-              <p className="text-sm text-blue-900 italic">{selectedEntry.prompt}</p>
+            <div className="bg-white border-l-4 border-blue-600 rounded-lg p-4 mb-6">
+              <p className="text-base text-slate-600 italic">{selectedEntry.prompt}</p>
             </div>
           )}
           
@@ -445,8 +445,8 @@ export function Journal({ storage }: JournalProps) {
                           setSelectedPrompt(prompt);
                           setShowPromptPicker(false);
                         }}
-                        className={`w-full px-4 py-5 text-left border-b border-slate-200 hover:bg-slate-50 active:bg-slate-100 transition-colors ${
-                          selectedPrompt === prompt ? 'bg-blue-50 border-l-4 border-l-blue-600' : ''
+                        className={`w-full px-4 py-5 text-left border-b border-slate-200 active:bg-slate-50 ${
+                          selectedPrompt === prompt ? 'bg-white border-l-4 border-l-blue-600' : ''
                         }`}
                       >
                         <p className="text-base leading-relaxed text-slate-700">{prompt}</p>
@@ -459,8 +459,8 @@ export function Journal({ storage }: JournalProps) {
           )}
 
           {selectedPrompt && (
-            <div className="bg-blue-50 border-l-4 border-blue-500 rounded-lg p-4 mb-4">
-              <p className="text-sm text-blue-900 italic">{selectedPrompt}</p>
+            <div className="bg-white border-l-4 border-blue-600 rounded-lg p-4 mb-4">
+              <p className="text-base text-slate-600 italic">{selectedPrompt}</p>
             </div>
           )}
 
@@ -480,7 +480,7 @@ export function Journal({ storage }: JournalProps) {
   // Resources View
   if (viewMode === 'resources') {
     return (
-      <div className="min-h-screen bg-slate-50">
+      <div className="min-h-screen bg-white">
         {/* Header */}
         <div className="bg-white border-b border-slate-200 sticky top-0 z-10 p-3">
           <button
@@ -495,7 +495,7 @@ export function Journal({ storage }: JournalProps) {
 
         <div className="p-4 space-y-4">
           {/* Daily Prompts */}
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+          <div className="bg-white rounded-lg p-4 border border-slate-200">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-700">
                 📝
@@ -509,15 +509,15 @@ export function Journal({ storage }: JournalProps) {
 
             <div className="space-y-3">
               {dailyPrompts.map((prompt, idx) => (
-                <div key={idx} className="bg-slate-50 rounded-lg p-4 border-l-4 border-blue-400">
-                  <p className="text-slate-700 text-sm">{prompt}</p>
+                <div key={idx} className="bg-white rounded-lg p-4 border-l-4 border-blue-600">
+                  <p className="text-base text-slate-600">{prompt}</p>
                 </div>
               ))}
             </div>
           </div>
 
           {/* Weekly Prompts */}
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+          <div className="bg-white rounded-lg p-4 border border-slate-200">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700">
                 📅
@@ -531,15 +531,15 @@ export function Journal({ storage }: JournalProps) {
 
             <div className="space-y-3">
               {weeklyPrompts.map((prompt, idx) => (
-                <div key={idx} className="bg-slate-50 rounded-lg p-4 border-l-4 border-indigo-400">
-                  <p className="text-slate-700 text-sm">{prompt}</p>
+                <div key={idx} className="bg-white rounded-lg p-4 border-l-4 border-blue-600">
+                  <p className="text-base text-slate-600">{prompt}</p>
                 </div>
               ))}
             </div>
           </div>
 
           {/* Affirmations */}
-          <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 shadow-sm border border-blue-200">
+          <div className="bg-white rounded-lg p-4 border-l-4 border-blue-600">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white">
                 ✦
@@ -553,15 +553,15 @@ export function Journal({ storage }: JournalProps) {
 
             <div className="grid gap-3">
               {affirmations.map((affirmation, idx) => (
-                <div key={idx} className="bg-white rounded-lg p-4 shadow-sm border border-blue-100">
-                  <p className="text-slate-700 text-sm italic">"{affirmation}"</p>
+                <div key={idx} className="bg-white rounded-lg p-4 border border-slate-200">
+                  <p className="text-base text-slate-600 italic">"{affirmation}"</p>
                 </div>
               ))}
             </div>
           </div>
 
           {/* Journaling Tips */}
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+          <div className="bg-white rounded-lg p-4 border border-slate-200">
             <h3 className="text-lg font-semibold text-slate-900 mb-3">💡 Gentle Journaling Guidance</h3>
             <ul className="space-y-3 text-sm text-slate-600">
               <li className="pl-6 relative before:content-['•'] before:absolute before:left-0 before:text-blue-500">

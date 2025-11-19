@@ -124,7 +124,7 @@ export default function App() {
   // Show loading state
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center">
+      <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-slate-600">Loading...</p>
@@ -139,122 +139,131 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+    <div className="min-h-screen bg-white">
       {/* Header */}
-      <header className="bg-white/80 backdrop-blur-sm border-b border-slate-200 sticky top-0 z-10">
-        <div className="flex items-center justify-between px-3 py-2">
-          <div className="flex items-center gap-2">
-            <h1 className="text-sm font-semibold text-slate-800">
-              Cole's Spiritual Recovery Toolkit
-            </h1>
-            {useSupabase && user && (
-              <Cloud className="w-3 h-3 text-slate-400" />
-            )}
-            {!useSupabase && (
-              <HardDrive className="w-3 h-3 text-slate-400" />
-            )}
-          </div>
-          <div className="flex gap-1">
+      <header className="bg-white border-b border-slate-200 sticky top-0 z-10">
+        <div className="flex items-center justify-between px-4 py-3">
+          <h1 className="text-base font-semibold text-black">
+            Recovery Toolkit
+          </h1>
+          <div className="flex gap-2">
             {useSupabase && user && (
               <button
                 onClick={handleSignOut}
-                className="p-1.5 rounded-lg bg-slate-100 active:bg-slate-200 text-slate-700"
+                className="p-2 text-slate-600 active:opacity-50"
               >
-                <LogOut className="w-4 h-4" />
+                <LogOut className="w-5 h-5" />
               </button>
             )}
             <button
               onClick={() => setShowSettings(!showSettings)}
-              className="p-1.5 rounded-lg bg-slate-100 active:bg-slate-200 text-slate-700"
+              className="p-2 text-slate-600 active:opacity-50"
             >
-              <Settings className="w-4 h-4" />
+              <Settings className="w-5 h-5" />
             </button>
           </div>
         </div>
       </header>
 
-      {/* Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-slate-200 z-20">
+      {/* Bottom Navigation - iOS Tab Bar Style */}
+      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 z-20 safe-area-inset-bottom">
         <div className="flex justify-around items-center h-16">
           <button
             onClick={() => setActiveSection('workbook')}
-            className={`flex flex-col items-center justify-center flex-1 h-full transition-colors ${
+            className={`relative flex flex-col items-center justify-center flex-1 h-full transition-colors ${
               activeSection === 'workbook'
                 ? 'text-blue-600'
-                : 'text-slate-500 active:bg-slate-50'
+                : 'text-slate-500'
             }`}
           >
-            <BookOpen className="w-6 h-6 mb-1" />
-            <span className="text-xs font-medium">Workbook</span>
+            <BookOpen className="w-6 h-6" />
+            {activeSection === 'workbook' && (
+              <div className="absolute top-1 w-1 h-1 bg-blue-600 rounded-full" />
+            )}
           </button>
           
           <button
             onClick={() => setActiveSection('plan')}
-            className={`flex flex-col items-center justify-center flex-1 h-full transition-colors ${
+            className={`relative flex flex-col items-center justify-center flex-1 h-full transition-colors ${
               activeSection === 'plan'
                 ? 'text-blue-600'
-                : 'text-slate-500 active:bg-slate-50'
+                : 'text-slate-500'
             }`}
           >
-            <Calendar className="w-6 h-6 mb-1" />
-            <span className="text-xs font-medium">Plan</span>
+            <Calendar className="w-6 h-6" />
+            {activeSection === 'plan' && (
+              <div className="absolute top-1 w-1 h-1 bg-blue-600 rounded-full" />
+            )}
           </button>
           
           <button
             onClick={() => setActiveSection('journal')}
-            className={`flex flex-col items-center justify-center flex-1 h-full transition-colors ${
+            className={`relative flex flex-col items-center justify-center flex-1 h-full transition-colors ${
               activeSection === 'journal'
                 ? 'text-blue-600'
-                : 'text-slate-500 active:bg-slate-50'
+                : 'text-slate-500'
             }`}
           >
-            <NotebookPen className="w-6 h-6 mb-1" />
-            <span className="text-xs font-medium">Journal</span>
+            <NotebookPen className="w-6 h-6" />
+            {activeSection === 'journal' && (
+              <div className="absolute top-1 w-1 h-1 bg-blue-600 rounded-full" />
+            )}
           </button>
         </div>
       </nav>
 
-      {/* Settings Modal */}
+      {/* Settings - iOS Style Full Screen */}
       {showSettings && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-slate-800">Settings & Data Management</h2>
+        <div className="fixed inset-0 bg-white z-50 overflow-y-auto">
+          <div className="bg-white">
+            {/* Header */}
+            <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200 sticky top-0 bg-white z-10">
+              <h2 className="text-lg font-semibold text-black">Settings</h2>
               <button
                 onClick={() => setShowSettings(false)}
-                className="text-slate-400 hover:text-slate-600 transition-colors"
+                className="p-2 text-blue-600 active:opacity-50"
               >
-                <X className="w-6 h-6" />
+                Done
               </button>
             </div>
 
-            <div className="space-y-4">
-              {/* Export Data */}
-              <div className="border border-slate-200 rounded-lg p-4">
-                <h3 className="text-slate-800 mb-2 flex items-center gap-2">
-                  <Download className="w-5 h-5 text-blue-600" />
-                  Export Your Data
-                </h3>
-                <p className="text-sm text-slate-600 mb-3">
-                  Download all your journal entries, notes, and progress as a backup file.
+            <div className="px-4 py-2">
+              {/* Storage Info */}
+              <div className="py-3 border-b border-slate-200">
+                <p className="text-sm text-slate-600 mb-1">
+                  {useSupabase ? (
+                    <>
+                      <Cloud className="w-4 h-4 inline mr-1" />
+                      Cloud Storage Active
+                    </>
+                  ) : (
+                    <>
+                      <HardDrive className="w-4 h-4 inline mr-1" />
+                      Local Storage
+                    </>
+                  )}
                 </p>
-                <button
-                  onClick={handleExport}
-                  className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  Download Backup
-                </button>
+                {useSupabase && user && (
+                  <p className="text-xs text-slate-500">
+                    {user.email}
+                  </p>
+                )}
               </div>
 
+              {/* Export Data */}
+              <button
+                onClick={handleExport}
+                className="w-full flex items-center justify-between py-4 border-b border-slate-200 active:bg-slate-50"
+              >
+                <div className="flex items-center gap-3">
+                  <Download className="w-5 h-5 text-blue-600" />
+                  <span className="text-base text-black">Export Data</span>
+                </div>
+                <span className="text-sm text-slate-500">Download backup</span>
+              </button>
+
               {/* Import Data */}
-              <div className="border border-slate-200 rounded-lg p-4">
-                <h3 className="text-slate-800 mb-2 flex items-center gap-2">
-                  <Upload className="w-5 h-5 text-indigo-600" />
-                  Import Data
-                </h3>
-                <p className="text-sm text-slate-600 mb-3">
-                  Restore your data from a previously exported backup file.
-                </p>
+              <div className="border-b border-slate-200">
                 <input
                   ref={fileInputRef}
                   type="file"
@@ -264,66 +273,38 @@ export default function App() {
                 />
                 <button
                   onClick={() => fileInputRef.current?.click()}
-                  className="w-full px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                  className="w-full flex items-center justify-between py-4 active:bg-slate-50"
                 >
-                  Choose File to Import
+                  <div className="flex items-center gap-3">
+                    <Upload className="w-5 h-5 text-blue-600" />
+                    <span className="text-base text-black">Import Data</span>
+                  </div>
+                  <span className="text-sm text-slate-500">Restore backup</span>
                 </button>
               </div>
 
               {/* Clear All Data */}
-              <div className="border border-red-200 rounded-lg p-4 bg-red-50">
-                <h3 className="text-slate-800 mb-2 flex items-center gap-2">
+              <button
+                onClick={handleClearData}
+                className="w-full flex items-center justify-between py-4 border-b border-slate-200 active:bg-red-50"
+              >
+                <div className="flex items-center gap-3">
                   <Trash2 className="w-5 h-5 text-red-600" />
-                  Clear All Data
-                </h3>
-                <p className="text-sm text-slate-600 mb-3">
-                  Permanently delete all your data. This action cannot be undone.
-                </p>
-                <button
-                  onClick={handleClearData}
-                  className="w-full px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-                >
-                  Delete Everything
-                </button>
-              </div>
-
-              {/* Info */}
-              <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                <p className="text-sm text-slate-600 mb-2">
-                  {useSupabase ? (
-                    <>
-                      <Cloud className="w-4 h-4 inline mr-1" />
-                      <strong>Cloud Storage Active:</strong> Your data is synced to Supabase and accessible from any device.
-                    </>
-                  ) : (
-                    <>
-                      <HardDrive className="w-4 h-4 inline mr-1" />
-                      <strong>Local Storage Active:</strong> Your data is stored locally in your browser. Export regularly to keep backups!
-                    </>
-                  )}
-                </p>
-                {useSupabase && user && (
-                  <p className="text-xs text-slate-500">
-                    Logged in as: {user.email}
-                  </p>
-                )}
-              </div>
+                  <span className="text-base text-red-600">Clear All Data</span>
+                </div>
+                <span className="text-sm text-slate-500">Delete everything</span>
+              </button>
             </div>
           </div>
         </div>
       )}
 
       {/* Main Content */}
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-4 pb-20">
+      <main className="max-w-6xl mx-auto px-4 pb-20">
         {activeSection === 'workbook' && <Workbook storage={storageBackend} />}
         {activeSection === 'plan' && <WeeklyPlan storage={storageBackend} />}
         {activeSection === 'journal' && <Journal storage={storageBackend} />}
       </main>
-
-      {/* Footer */}
-      <footer className="text-center py-8 text-slate-500 text-sm">
-        <p>A personal toolkit for spiritual recovery and growth</p>
-      </footer>
     </div>
   );
 }
