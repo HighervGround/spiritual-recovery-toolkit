@@ -165,7 +165,7 @@ export const supabaseStorage = {
         completed: existing?.completed || false,
         notes: existing?.notes || '',
         reflectionAnswers: existing?.reflection_answers || {},
-        lastUpdated: existing?.last_updated || new Date().toISOString(),
+        lastUpdated: existing?.updated_at || new Date().toISOString(),
       };
     });
   },
@@ -189,7 +189,7 @@ export const supabaseStorage = {
     if (updates.reflectionAnswers !== undefined) updateData.reflection_answers = updates.reflectionAnswers;
 
     if (existing) {
-      // Update existing - don't include last_updated in the update data
+      // Update existing - don't include updated_at in the update data
       const { error } = await supabase
         .from('step_progress')
         .update(updateData)
@@ -265,7 +265,7 @@ export const supabaseStorage = {
         weekNumber,
         completed: existing?.completed || false,
         notes: existing?.notes || '',
-        lastUpdated: existing?.last_updated || new Date().toISOString(),
+        lastUpdated: existing?.updated_at || new Date().toISOString(),
       };
     });
   },
@@ -285,7 +285,7 @@ export const supabaseStorage = {
     const updateData = {
       completed: updates.completed,
       notes: updates.notes,
-      last_updated: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
     };
 
     if (existing) {
@@ -331,7 +331,7 @@ export const supabaseStorage = {
         .from('weekly_progress')
         .update({
           completed: newCompleted,
-          last_updated: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
         })
         .eq('user_id', user.id)
         .eq('week_number', weekNumber);
@@ -345,7 +345,7 @@ export const supabaseStorage = {
           user_id: user.id,
           week_number: weekNumber,
           completed: newCompleted,
-          last_updated: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
         });
 
       if (error) throw error;

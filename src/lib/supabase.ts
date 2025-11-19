@@ -76,7 +76,7 @@ export interface Database {
         completed: boolean;
         notes: string;
         reflection_answers: { [key: string]: string };
-        last_updated: string;
+        updated_at: string;
         created_at: string;
       };
       Insert: {
@@ -86,7 +86,7 @@ export interface Database {
         completed?: boolean;
         notes?: string;
         reflection_answers?: { [key: string]: string };
-        last_updated?: string;
+        updated_at?: string;
         created_at?: string;
       };
       Update: {
@@ -96,7 +96,7 @@ export interface Database {
         completed?: boolean;
         notes?: string;
         reflection_answers?: { [key: string]: string };
-        last_updated?: string;
+        updated_at?: string;
         created_at?: string;
       };
     };
@@ -106,7 +106,7 @@ export interface Database {
           user_id: string;
           week_number: number;
           completed: boolean;
-          last_updated: string;
+          updated_at: string;
           created_at: string;
         };
         Insert: {
@@ -114,7 +114,7 @@ export interface Database {
           user_id: string;
           week_number: number;
           completed?: boolean;
-          last_updated?: string;
+          updated_at?: string;
           created_at?: string;
         };
         Update: {
@@ -122,7 +122,7 @@ export interface Database {
           user_id?: string;
           week_number?: number;
           completed?: boolean;
-          last_updated?: string;
+          updated_at?: string;
           created_at?: string;
         };
       };
