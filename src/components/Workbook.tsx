@@ -769,11 +769,10 @@ export function Workbook({ storage }: WorkbookProps) {
                               <div className="flex gap-2 flex-wrap">
                                 <button
                                   onClick={() => saveReflection(step.number, question)}
-                                  className="flex items-center justify-center gap-2 px-6 py-4 text-lg rounded-xl bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800 transition-colors shadow-lg font-bold border-2 border-blue-900"
-                                  style={{ minHeight: '56px' }}
+                                  className="flex items-center justify-center gap-1.5 px-4 py-2 text-sm rounded-lg bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800 transition-colors shadow-md font-semibold"
                                 >
-                                  <Save className="w-6 h-6" />
-                                  💾 Save Answer
+                                  <Save className="w-4 h-4" />
+                                  Save Answer
                                 </button>
                                 {savedAnswer && (
                                   <button
