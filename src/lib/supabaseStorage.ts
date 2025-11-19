@@ -182,16 +182,14 @@ export const supabaseStorage = {
       .eq('step_number', stepNumber)
       .single();
 
-    const updateData: any = {
-      last_updated: new Date().toISOString(),
-    };
+    const updateData: any = {};
 
     if (updates.completed !== undefined) updateData.completed = updates.completed;
     if (updates.notes !== undefined) updateData.notes = updates.notes;
     if (updates.reflectionAnswers !== undefined) updateData.reflection_answers = updates.reflectionAnswers;
 
     if (existing) {
-      // Update existing
+      // Update existing - don't include last_updated in the update data
       const { error } = await supabase
         .from('step_progress')
         .update(updateData)
@@ -200,13 +198,15 @@ export const supabaseStorage = {
 
       if (error) throw error;
     } else {
-      // Insert new
+      // Insert new - include all fields for insert
       const { error } = await supabase
         .from('step_progress')
         .insert({
           user_id: user.id,
           step_number: stepNumber,
-          ...updateData,
+          completed: updates.completed ?? false,
+          notes: updates.notes ?? '',
+          reflection_answers: updates.reflectionAnswers ?? {},
         });
 
       if (error) throw error;
