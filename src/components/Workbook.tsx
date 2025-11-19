@@ -743,18 +743,20 @@ export function Workbook({ storage }: WorkbookProps) {
                       const displayValue = isEditing ? editingReflections[key] : savedAnswer;
                       
                       return (
-                        <div key={idx} className="bg-slate-50 rounded-lg p-4 border border-slate-200">
-                          <p className="text-slate-700 mb-2 font-medium text-sm sm:text-base">{question}</p>
+                        <div key={idx} className="bg-white rounded-xl p-5 border-2 border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+                          <p className="text-slate-800 mb-3 font-medium text-base leading-relaxed">{question}</p>
                           
                           {!isEditing && savedAnswer ? (
                             <div>
-                              <p className="text-slate-600 whitespace-pre-wrap mb-3">{savedAnswer}</p>
+                              <div className="bg-blue-50 rounded-lg p-4 mb-3 border-l-4 border-blue-500">
+                                <p className="text-slate-700 whitespace-pre-wrap leading-relaxed">{savedAnswer}</p>
+                              </div>
                               <button
                                 onClick={() => handleReflectionEdit(step.number, question, savedAnswer)}
-                                className="flex items-center gap-1 px-3 py-1.5 text-sm rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+                                className="flex items-center gap-1.5 px-3 py-2 text-sm rounded-lg bg-white border-2 border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-blue-500 transition-colors font-medium"
                               >
-                                <Edit2 className="w-3 h-3" />
-                                Edit
+                                <Edit2 className="w-4 h-4" />
+                                Edit Answer
                               </button>
                             </div>
                           ) : (
@@ -763,13 +765,13 @@ export function Workbook({ storage }: WorkbookProps) {
                                 value={displayValue}
                                 onChange={(e) => handleReflectionEdit(step.number, question, e.target.value)}
                                 placeholder="Write your reflection here..."
-                                className="w-full min-h-[100px] px-3 py-3 rounded border border-slate-300 text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y bg-white mb-2"
+                                className="w-full min-h-[120px] px-4 py-3 rounded-lg border-2 border-slate-300 text-slate-700 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 resize-y bg-white mb-3"
                                 style={{ fontSize: '16px' }}
                               />
                               <div className="flex gap-2 flex-wrap">
                                 <button
                                   onClick={() => saveReflection(step.number, question)}
-                                  className="flex items-center justify-center gap-1.5 px-4 py-2 text-sm rounded-lg bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800 transition-colors shadow-md font-semibold"
+                                  className="flex items-center justify-center gap-1.5 px-4 py-2 text-sm rounded-lg bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800 transition-colors shadow-sm font-semibold"
                                 >
                                   <Save className="w-4 h-4" />
                                   Save Answer
@@ -777,9 +779,9 @@ export function Workbook({ storage }: WorkbookProps) {
                                 {savedAnswer && (
                                   <button
                                     onClick={() => cancelReflectionEdit(key)}
-                                    className="flex items-center justify-center gap-2 px-5 py-3 text-base rounded-lg bg-slate-200 text-slate-800 hover:bg-slate-300 active:bg-slate-400 transition-colors border-2 border-slate-400 font-medium"
+                                    className="flex items-center justify-center gap-1.5 px-4 py-2 text-sm rounded-lg bg-white border-2 border-slate-300 text-slate-700 hover:bg-slate-50 transition-colors font-medium"
                                   >
-                                    <X className="w-5 h-5" />
+                                    <X className="w-4 h-4" />
                                     Cancel
                                   </button>
                                 )}
