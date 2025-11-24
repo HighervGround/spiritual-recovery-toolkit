@@ -276,7 +276,7 @@ export function ResentmentReview({ weekNumber, storage }: ResentmentReviewProps)
         <div className="px-4 py-3 bg-slate-50 border-b border-slate-200 text-sm text-slate-700">
           <p className="mb-2"><strong>Work column by column:</strong> Complete Column 1 for all entries, then Column 2, then 3, then 4.</p>
           <p className="text-xs text-slate-600 mb-2">Column 1: Who/what are you resentful at? • Column 2: Why? • Column 3: Which part of self affected? • Column 4: What were your wrongs?</p>
-          <p className="text-xs text-blue-700 italic">💡 All columns are visible for each entry so you can reference previous work. The highlighted column shows your current focus.</p>
+          <p className="text-xs text-blue-700 italic">💡 Column 1 is always visible as your reference. The active column appears below it for focused work.</p>
         </div>
       )}
 
@@ -398,18 +398,19 @@ export function ResentmentReview({ weekNumber, storage }: ResentmentReviewProps)
                   </button>
                 </div>
 
-                <div className="space-y-4">
-                  {/* COLUMN 1 - Always visible */}
+                <div className="space-y-6">
+                  {/* COLUMN 1 - Always visible as reference */}
                   <div className={`bg-white rounded-lg p-5 border-2 transition-all ${
                     activeColumn === 1 
                       ? 'border-blue-500 shadow-md' 
-                      : 'border-slate-200 opacity-75'
+                      : 'border-slate-200'
                   }`}>
                     <label className={`text-sm font-semibold mb-3 block ${
                       activeColumn === 1 ? 'text-blue-700' : 'text-slate-600'
                     }`}>
                       Column 1: I'm resentful at
                       {activeColumn === 1 && <span className="ml-2 text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded">Focus</span>}
+                      {activeColumn !== 1 && <span className="ml-2 text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded">Reference</span>}
                     </label>
                     <Textarea
                       value={entry.column1 || entry.column1Text || ''}
@@ -418,51 +419,38 @@ export function ResentmentReview({ weekNumber, storage }: ResentmentReviewProps)
                       className={`w-full resize-y ${
                         activeColumn === 1 
                           ? 'min-h-[180px] text-lg' 
-                          : 'min-h-[120px] text-base bg-slate-50'
+                          : 'min-h-[100px] text-base bg-slate-50'
                       }`}
-                      rows={activeColumn === 1 ? 8 : 5}
+                      rows={activeColumn === 1 ? 8 : 4}
                       inputMode="text"
                     />
                   </div>
 
-                  {/* COLUMN 2 - Always visible */}
-                  <div className={`bg-white rounded-lg p-5 border-2 transition-all ${
-                    activeColumn === 2 
-                      ? 'border-blue-500 shadow-md' 
-                      : 'border-slate-200 opacity-75'
-                  }`}>
-                    <label className={`text-sm font-semibold mb-3 block ${
-                      activeColumn === 2 ? 'text-blue-700' : 'text-slate-600'
-                    }`}>
+                  {/* COLUMN 2 - Show only when activeColumn === 2 */}
+                  {activeColumn === 2 && (
+                  <div className="bg-white rounded-lg p-5 border-2 border-blue-500 shadow-md transition-all">
+                    <label className="text-sm font-semibold mb-3 block text-blue-700">
                       Column 2: The cause
-                      {activeColumn === 2 && <span className="ml-2 text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded">Focus</span>}
+                      <span className="ml-2 text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded">Focus</span>
                     </label>
                     <Textarea
                       value={entry.column2 || entry.column2Text || ''}
                       onChange={(e) => updateColumn2(entry.id, e.target.value)}
                       placeholder="Why was I angry? What specifically caused the resentment? (You can type or write with Apple Pencil - iPad will convert handwriting automatically)"
-                      className={`w-full resize-y ${
-                        activeColumn === 2 
-                          ? 'min-h-[180px] text-lg' 
-                          : 'min-h-[120px] text-base bg-slate-50'
-                      }`}
-                      rows={activeColumn === 2 ? 8 : 5}
+                      className="w-full resize-y min-h-[180px] text-lg"
+                      rows={8}
                       inputMode="text"
                     />
                   </div>
+                  )}
 
-                  {/* COLUMN 3 - Always visible */}
-                  <div className={`bg-white rounded-lg p-5 border-2 transition-all ${
-                    activeColumn === 3 
-                      ? 'border-blue-500 shadow-md' 
-                      : 'border-slate-200 opacity-75'
-                  }`}>
+                  {/* COLUMN 3 - Show only when activeColumn === 3 */}
+                  {activeColumn === 3 && (
+                  <div className="bg-white rounded-lg p-5 border-2 border-blue-500 shadow-md transition-all">
                     <div className="mb-4">
-                      <h5 className={`text-sm font-semibold mb-1 ${
-                        activeColumn === 3 ? 'text-blue-700' : 'text-slate-600'
-                      }`}>
+                      <h5 className="text-sm font-semibold mb-1 text-blue-700">
                         Column 3: Affects my
-                        {activeColumn === 3 && <span className="ml-2 text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded">Focus</span>}
+                        <span className="ml-2 text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded">Focus</span>
                       </h5>
                       <p className="text-xs text-slate-500">Which part of self is affected?</p>
                     </div>
@@ -647,19 +635,15 @@ export function ResentmentReview({ weekNumber, storage }: ResentmentReviewProps)
                       </div>
                     </div>
                   </div>
+                  )}
 
-                  {/* COLUMN 4 - Always visible */}
-                  <div className={`bg-white rounded-lg p-5 border-2 transition-all space-y-5 ${
-                    activeColumn === 4 
-                      ? 'border-blue-500 shadow-md' 
-                      : 'border-slate-200 opacity-75'
-                  }`}>
+                  {/* COLUMN 4 - Show only when activeColumn === 4 */}
+                  {activeColumn === 4 && (
+                  <div className="bg-white rounded-lg p-5 border-2 border-blue-500 shadow-md transition-all space-y-5">
                     <div>
-                      <h5 className={`text-sm font-semibold mb-1 ${
-                        activeColumn === 4 ? 'text-blue-700' : 'text-slate-600'
-                      }`}>
+                      <h5 className="text-sm font-semibold mb-1 text-blue-700">
                         Column 4: Nature of my wrongs
-                        {activeColumn === 4 && <span className="ml-2 text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded">Focus</span>}
+                        <span className="ml-2 text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded">Focus</span>
                       </h5>
                       <p className="text-xs text-slate-500">What is the exact nature of my wrongs, faults, mistakes, defects, shortcomings</p>
                     </div>
@@ -727,9 +711,7 @@ export function ResentmentReview({ weekNumber, storage }: ResentmentReviewProps)
 
                     {/* Where Was I To Blame */}
                     <div>
-                      <label className={`text-sm font-semibold mb-2 block ${
-                        activeColumn === 4 ? 'text-blue-700' : 'text-slate-600'
-                      }`}>
+                      <label className="text-sm font-semibold mb-2 block text-blue-700">
                         Where was I to blame?
                       </label>
                       <p className="text-xs text-slate-500 mb-2">What's the truth here? Where was my responsibility?</p>
@@ -737,16 +719,13 @@ export function ResentmentReview({ weekNumber, storage }: ResentmentReviewProps)
                         value={entry.column4.whereWasIToBlame || ''}
                         onChange={(e) => updateColumn4(entry.id, 'whereWasIToBlame', e.target.value)}
                         placeholder="What was my part? What could I have done differently? (You can type or write with Apple Pencil - iPad will convert handwriting automatically)"
-                        className={`w-full resize-y ${
-                          activeColumn === 4 
-                            ? 'min-h-[180px] text-lg' 
-                            : 'min-h-[120px] text-base bg-slate-50'
-                        }`}
-                        rows={activeColumn === 4 ? 8 : 5}
+                        className="w-full resize-y min-h-[180px] text-lg"
+                        rows={8}
                         inputMode="text"
                       />
                     </div>
                   </div>
+                  )}
                 </div>
               </div>
             );
