@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Plus, Trash2, ChevronDown, ChevronUp, CheckCircle2, HelpCircle, Lightbulb, ChevronRight } from 'lucide-react';
+import { Plus, Trash2, ChevronDown, ChevronUp, CheckCircle2, HelpCircle, Lightbulb, ChevronRight, X, Heart, Pause, Search, ChevronLeft } from 'lucide-react';
 import { Textarea } from './ui/textarea';
 import { Checkbox } from './ui/checkbox';
 import type { ResentmentEntry, FearEntry, SexualConductEntry } from '../lib/storage';
@@ -96,11 +96,19 @@ export function Step4Inventory({ weekNumber, storage }: Step4InventoryProps) {
   const [showPrompts, setShowPrompts] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [showCompassionReminder, setShowCompassionReminder] = useState(true);
+  const [showBreakDialog, setShowBreakDialog] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const isInitialLoad = useRef(true);
 
   useEffect(() => {
     loadAllEntries();
+    // Check if compassion reminder was dismissed
+    const dismissed = localStorage.getItem('step4-compassion-reminder-dismissed');
+    if (dismissed === 'true') {
+      setShowCompassionReminder(false);
+    }
   }, [weekNumber]);
 
   useEffect(() => {
@@ -110,6 +118,29 @@ export function Step4Inventory({ weekNumber, storage }: Step4InventoryProps) {
       }
     };
   }, []);
+
+  const dismissCompassionReminder = () => {
+    setShowCompassionReminder(false);
+    localStorage.setItem('step4-compassion-reminder-dismissed', 'true');
+  };
+
+  const handleTakeBreak = async () => {
+    // Force immediate save
+    try {
+      setSaving(true);
+      await storage.updateWeekProgress(weekNumber, {
+        resentmentEntries,
+        fearEntries,
+        sexualConductEntries,
+      });
+      setSaved(true);
+    } catch (error: any) {
+      console.error('Error saving:', error);
+    } finally {
+      setSaving(false);
+    }
+    setShowBreakDialog(true);
+  };
 
   const loadAllEntries = async () => {
     try {
@@ -205,6 +236,30 @@ export function Step4Inventory({ weekNumber, storage }: Step4InventoryProps) {
     debouncedSave({ resentmentEntries: updated });
   };
 
+  const checkForDuplicateResentment = (column1Text: string, currentEntryId?: string): string | null => {
+    const normalized = column1Text.trim().toLowerCase();
+    if (normalized.length < 3) return null; // Don't check very short entries
+    
+    const existing = resentmentEntries.find(e => {
+      if (e.id === currentEntryId) return false; // Don't check against self
+      const existingText = (e.column1 || '').trim().toLowerCase();
+      if (!existingText) return false;
+      
+      // Check for exact match
+      if (existingText === normalized) return true;
+      
+      // Simple similarity check - if one contains the other or vice versa
+      const longer = normalized.length > existingText.length ? normalized : existingText;
+      const shorter = normalized.length > existingText.length ? existingText : normalized;
+      // If shorter is at least 80% of longer and contained in longer, consider it a duplicate
+      if (shorter.length / longer.length >= 0.8 && longer.includes(shorter)) {
+        return true;
+      }
+      return false;
+    });
+    return existing ? existing.column1 || null : null;
+  };
+
   const updateResentmentColumn1 = (id: string, value: string) => {
     const updated = resentmentEntries.map(e =>
       e.id === id ? { ...e, column1: value } : e
@@ -274,6 +329,27 @@ export function Step4Inventory({ weekNumber, storage }: Step4InventoryProps) {
     debouncedSave({ fearEntries: updated });
   };
 
+  const checkForDuplicateFear = (fearText: string, currentEntryId?: string): string | null => {
+    const normalized = fearText.trim().toLowerCase();
+    if (normalized.length < 3) return null;
+    
+    const existing = fearEntries.find(e => {
+      if (e.id === currentEntryId) return false;
+      const existingText = (e.fear || '').trim().toLowerCase();
+      if (!existingText) return false;
+      if (existingText === normalized) return true;
+      if (normalized.length > 0 && existingText.length > 0) {
+        const longer = normalized.length > existingText.length ? normalized : existingText;
+        const shorter = normalized.length > existingText.length ? existingText : normalized;
+        if (shorter.length / longer.length >= 0.8 && longer.includes(shorter)) {
+          return true;
+        }
+      }
+      return false;
+    });
+    return existing ? existing.fear || null : null;
+  };
+
   const updateFearEntry = (id: string, field: 'fear' | 'partOfSelfFailed' | 'fearPrayer', value: string) => {
     const updated = fearEntries.map(e =>
       e.id === id ? { ...e, [field]: value } : e
@@ -307,6 +383,27 @@ export function Step4Inventory({ weekNumber, storage }: Step4InventoryProps) {
     debouncedSave({ sexualConductEntries: updated });
   };
 
+  const checkForDuplicateSexualConduct = (whomText: string, currentEntryId?: string): string | null => {
+    const normalized = whomText.trim().toLowerCase();
+    if (normalized.length < 3) return null;
+    
+    const existing = sexualConductEntries.find(e => {
+      if (e.id === currentEntryId) return false;
+      const existingText = (e.whomDidIHurt || '').trim().toLowerCase();
+      if (!existingText) return false;
+      if (existingText === normalized) return true;
+      if (normalized.length > 0 && existingText.length > 0) {
+        const longer = normalized.length > existingText.length ? normalized : existingText;
+        const shorter = normalized.length > existingText.length ? existingText : normalized;
+        if (shorter.length / longer.length >= 0.8 && longer.includes(shorter)) {
+          return true;
+        }
+      }
+      return false;
+    });
+    return existing ? existing.whomDidIHurt || null : null;
+  };
+
   const updateSexualConductEntry = (id: string, field: keyof SexualConductEntry, value: string | boolean) => {
     const updated = sexualConductEntries.map(e =>
       e.id === id ? { ...e, [field]: value } : e
@@ -317,12 +414,42 @@ export function Step4Inventory({ weekNumber, storage }: Step4InventoryProps) {
 
   return (
     <div className="bg-white rounded-lg border border-slate-200">
+      {/* Compassion Reminder Banner */}
+      {showCompassionReminder && (
+        <div className="bg-blue-50 border-b border-blue-200 px-4 py-3 flex items-start gap-3">
+          <Heart className="w-5 h-5 text-blue-600 mt-0.5 shrink-0" />
+          <div className="flex-1">
+            <p className="text-sm text-blue-800 leading-relaxed">
+              <strong>This work takes courage.</strong> Be gentle with yourself. You can pause anytime. Your safety matters.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={dismissCompassionReminder}
+            className="text-blue-600 hover:text-blue-800 transition-colors shrink-0"
+            aria-label="Dismiss reminder"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
       {/* Header with Tabs */}
       <div className="border-b border-slate-200">
         <div className="px-4 py-3 flex items-center justify-between">
           <h3 className="text-lg font-semibold text-black">Step 4 Inventory</h3>
-          {saving && <span className="text-xs text-slate-500">Saving...</span>}
-          {saved && <span className="text-xs text-green-600">Saved</span>}
+          <div className="flex items-center gap-3">
+            {saving && <span className="text-xs text-slate-500">Saving...</span>}
+            {saved && <span className="text-xs text-green-600">Saved</span>}
+            <button
+              type="button"
+              onClick={handleTakeBreak}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors"
+            >
+              <Pause className="w-4 h-4" />
+              <span>Take a Break</span>
+            </button>
+          </div>
         </div>
         
         {/* Tabs */}
@@ -368,12 +495,15 @@ export function Step4Inventory({ weekNumber, storage }: Step4InventoryProps) {
         {activeTab === 'resentments' && (
           <ResentmentsSection
             entries={resentmentEntries}
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
             activeColumn={activeColumn}
             setActiveColumn={setActiveColumn}
             showPrompts={showPrompts}
             setShowPrompts={setShowPrompts}
             addEntry={addResentmentEntry}
             deleteEntry={deleteResentmentEntry}
+            checkForDuplicate={checkForDuplicateResentment}
             updateColumn1={updateResentmentColumn1}
             updateColumn2={updateResentmentColumn2}
             updateColumn3={updateResentmentColumn3}
@@ -384,10 +514,13 @@ export function Step4Inventory({ weekNumber, storage }: Step4InventoryProps) {
         {activeTab === 'fears' && (
           <FearsSection
             entries={fearEntries}
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
             showPrompts={showPrompts}
             setShowPrompts={setShowPrompts}
             addEntry={addFearEntry}
             deleteEntry={deleteFearEntry}
+            checkForDuplicate={checkForDuplicateFear}
             updateEntry={updateFearEntry}
           />
         )}
@@ -395,12 +528,63 @@ export function Step4Inventory({ weekNumber, storage }: Step4InventoryProps) {
         {activeTab === 'sexualConduct' && (
           <SexualConductSection
             entries={sexualConductEntries}
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
             addEntry={addSexualConductEntry}
             deleteEntry={deleteSexualConductEntry}
+            checkForDuplicate={checkForDuplicateSexualConduct}
             updateEntry={updateSexualConductEntry}
           />
         )}
       </div>
+
+      {/* Take a Break Dialog */}
+      {showBreakDialog && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-md w-full p-6 shadow-xl">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-black">Take a Break</h3>
+              <button
+                type="button"
+                onClick={() => setShowBreakDialog(false)}
+                className="text-slate-400 hover:text-slate-600"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="space-y-4">
+              <div className="bg-blue-50 border-l-4 border-blue-400 p-4 rounded">
+                <p className="text-sm font-medium text-blue-800 mb-2">Grounding Exercise</p>
+                <p className="text-sm text-blue-700 leading-relaxed">
+                  Body scan meditation. Lie down and bring gentle awareness to each part of your body, thanking it for carrying you this far. Or walk slowly in nature or around your space. With each step, say: "I release." "I am free." "I am whole."
+                </p>
+              </div>
+              <p className="text-sm text-slate-600">
+                Your progress has been saved. You can return to this inventory whenever you're ready.
+              </p>
+              <div className="flex gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowBreakDialog(false)}
+                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  Continue Working
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowBreakDialog(false);
+                    // Could navigate to journal here if we had navigation prop
+                  }}
+                  className="flex-1 px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors"
+                >
+                  I'm Done for Now
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -408,30 +592,81 @@ export function Step4Inventory({ weekNumber, storage }: Step4InventoryProps) {
 // Resentments Section Component
 function ResentmentsSection({
   entries,
+  searchQuery,
+  setSearchQuery,
   activeColumn,
   setActiveColumn,
   showPrompts,
   setShowPrompts,
   addEntry,
   deleteEntry,
+  checkForDuplicate,
   updateColumn1,
   updateColumn2,
   updateColumn3,
   updateColumn4,
 }: {
   entries: ResentmentEntry[];
+  searchQuery: string;
+  setSearchQuery: (query: string) => void;
   activeColumn: 1 | 2 | 3 | 4;
   setActiveColumn: (col: 1 | 2 | 3 | 4) => void;
   showPrompts: boolean;
   setShowPrompts: (show: boolean) => void;
   addEntry: () => void;
   deleteEntry: (id: string) => void;
+  checkForDuplicate: (text: string, currentEntryId?: string) => string | null;
   updateColumn1: (id: string, value: string) => void;
   updateColumn2: (id: string, value: string) => void;
   updateColumn3: (id: string, category: string, subcategory: string | undefined, value: boolean) => void;
   updateColumn4: (id: string, field: string, value: boolean | string) => void;
 }) {
   const [showInstructions, setShowInstructions] = useState(false);
+  const [showInsights, setShowInsights] = useState(false);
+  const [currentEntryIndex, setCurrentEntryIndex] = useState<number | null>(null);
+
+  // Filter entries based on search query
+  const filteredEntries = searchQuery.trim()
+    ? entries.filter(entry => {
+        const query = searchQuery.toLowerCase();
+        return (
+          entry.column1?.toLowerCase().includes(query) ||
+          entry.column2?.toLowerCase().includes(query) ||
+          entry.column4?.whereWasIToBlame?.toLowerCase().includes(query)
+        );
+      })
+    : entries;
+
+  // Reset current entry index when filtered entries change
+  useEffect(() => {
+    if (currentEntryIndex !== null && currentEntryIndex >= filteredEntries.length) {
+      setCurrentEntryIndex(null);
+    }
+  }, [filteredEntries.length, currentEntryIndex]);
+
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+        return; // Don't navigate when typing
+      }
+      if (e.key === 'ArrowLeft' && filteredEntries.length > 0) {
+        e.preventDefault();
+        setCurrentEntryIndex(prev => {
+          if (prev === null) return filteredEntries.length - 1;
+          return Math.max(0, prev - 1);
+        });
+      } else if (e.key === 'ArrowRight' && filteredEntries.length > 0) {
+        e.preventDefault();
+        setCurrentEntryIndex(prev => {
+          if (prev === null) return 1;
+          return Math.min(filteredEntries.length - 1, (prev || 0) + 1);
+        });
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [filteredEntries.length]);
 
   return (
     <div>
@@ -498,6 +733,63 @@ function ResentmentsSection({
         </div>
       )}
 
+      {/* Potential Duplicates Check */}
+      {entries.length > 1 && (
+        <div className="mb-4">
+          <button
+            type="button"
+            onClick={() => setShowInsights(!showInsights)}
+            className="w-full flex items-center justify-between p-3 bg-amber-50 rounded-lg border border-amber-200"
+          >
+            <div className="flex items-center gap-2">
+              <HelpCircle className="w-4 h-4 text-amber-600" />
+              <span className="text-sm font-medium text-amber-800">Check for Potential Duplicates</span>
+            </div>
+            {showInsights ? <ChevronUp className="w-4 h-4 text-amber-600" /> : <ChevronDown className="w-4 h-4 text-amber-600" />}
+          </button>
+          {showInsights && (
+            <div className="mt-2 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+              <div className="text-xs text-amber-800 space-y-2">
+                {(() => {
+                  const duplicates: Array<{ entry1: string; entry2: string }> = [];
+                  entries.forEach((e1, i) => {
+                    const text1 = (e1.column1 || '').trim().toLowerCase();
+                    if (!text1 || text1.length < 3) return;
+                    entries.slice(i + 1).forEach(e2 => {
+                      const text2 = (e2.column1 || '').trim().toLowerCase();
+                      if (!text2 || text2.length < 3) return;
+                      // Check for similarity
+                      const longer = text1.length > text2.length ? text1 : text2;
+                      const shorter = text1.length > text2.length ? text2 : text1;
+                      if (shorter.length / longer.length >= 0.8 && longer.includes(shorter)) {
+                        duplicates.push({
+                          entry1: e1.column1 || '',
+                          entry2: e2.column1 || '',
+                        });
+                      }
+                    });
+                  });
+                  return duplicates.length > 0 ? (
+                    <div>
+                      <p className="font-semibold mb-2 text-amber-900">Possible duplicates found:</p>
+                      <ul className="list-disc list-inside space-y-1">
+                        {duplicates.map((dup, idx) => (
+                          <li key={idx} className="text-amber-800">
+                            "{dup.entry1}" and "{dup.entry2}"
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : (
+                    <p className="text-amber-700 italic">No potential duplicates found. All entries appear unique.</p>
+                  );
+                })()}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Column Selector */}
       <div className="mb-4">
         <div className="flex gap-2">
@@ -551,26 +843,110 @@ function ResentmentsSection({
         </div>
       </div>
 
+      {/* Search */}
+      {entries.length > 0 && (
+        <div className="mb-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search entries..."
+              className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery('')}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
+          </div>
+          {searchQuery && (
+            <p className="text-xs text-slate-500 mt-2">
+              {filteredEntries.length === 0 ? 'No entries match' : `${filteredEntries.length} ${filteredEntries.length === 1 ? 'entry' : 'entries'} found`}
+            </p>
+          )}
+        </div>
+      )}
+
       {/* Entries */}
       <div className="space-y-6 pb-24">
-        {entries.length === 0 ? (
+        {filteredEntries.length === 0 && entries.length > 0 ? (
           <div className="text-center py-12 px-4">
-            <p className="text-slate-600 mb-4">Tap "Add Entry" below to begin</p>
+            <p className="text-slate-600 mb-4">No entries match your search.</p>
+          </div>
+        ) : filteredEntries.length === 0 ? (
+          <div className="text-center py-12 px-4">
+            <p className="text-slate-700 text-base mb-2 font-medium">Your first entry is the hardest. You've got this.</p>
+            <p className="text-slate-500 text-sm">Take your time. There's no rush.</p>
           </div>
         ) : (
-          entries.map((entry, index) => (
-            <ResentmentEntryCard
-              key={entry.id}
-              entry={entry}
-              index={index}
-              activeColumn={activeColumn}
-              deleteEntry={deleteEntry}
-              updateColumn1={updateColumn1}
-              updateColumn2={updateColumn2}
-              updateColumn3={updateColumn3}
-              updateColumn4={updateColumn4}
-            />
-          ))
+          <>
+            {/* Entry Navigation */}
+            {filteredEntries.length > 0 && (
+              <div className="mb-4 flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-slate-600">
+                    Entry {currentEntryIndex !== null ? currentEntryIndex + 1 : 1} of {filteredEntries.length}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (currentEntryIndex === null) {
+                        setCurrentEntryIndex(filteredEntries.length - 1);
+                      } else {
+                        setCurrentEntryIndex(Math.max(0, currentEntryIndex - 1));
+                      }
+                    }}
+                    disabled={filteredEntries.length === 0 || (currentEntryIndex !== null && currentEntryIndex === 0)}
+                    className="p-1.5 text-slate-600 hover:text-blue-600 disabled:text-slate-300 disabled:cursor-not-allowed transition-colors"
+                    title="Previous entry (←)"
+                  >
+                    <ChevronLeft className="w-5 h-5" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (currentEntryIndex === null) {
+                        setCurrentEntryIndex(1);
+                      } else {
+                        setCurrentEntryIndex(Math.min(filteredEntries.length - 1, currentEntryIndex + 1));
+                      }
+                    }}
+                    disabled={filteredEntries.length === 0 || (currentEntryIndex !== null && currentEntryIndex === filteredEntries.length - 1)}
+                    className="p-1.5 text-slate-600 hover:text-blue-600 disabled:text-slate-300 disabled:cursor-not-allowed transition-colors"
+                    title="Next entry (→)"
+                  >
+                    <ChevronRight className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+            )}
+            {filteredEntries.map((entry, index) => {
+              const isHighlighted = currentEntryIndex === index || (currentEntryIndex === null && index === 0);
+              return (
+                <div key={entry.id} className={isHighlighted ? 'ring-2 ring-blue-400 rounded-xl' : ''}>
+                  <ResentmentEntryCard
+                    entry={entry}
+                    index={index}
+                    activeColumn={activeColumn}
+                    deleteEntry={deleteEntry}
+                    checkForDuplicate={checkForDuplicate}
+                    updateColumn1={updateColumn1}
+                    updateColumn2={updateColumn2}
+                    updateColumn3={updateColumn3}
+                    updateColumn4={updateColumn4}
+                  />
+                </div>
+              );
+            })}
+          </>
         )}
       </div>
 
@@ -595,6 +971,7 @@ function ResentmentEntryCard({
   index,
   activeColumn,
   deleteEntry,
+  checkForDuplicate,
   updateColumn1,
   updateColumn2,
   updateColumn3,
@@ -604,11 +981,28 @@ function ResentmentEntryCard({
   index: number;
   activeColumn: 1 | 2 | 3 | 4;
   deleteEntry: (id: string) => void;
+  checkForDuplicate: (text: string, currentEntryId?: string) => string | null;
   updateColumn1: (id: string, value: string) => void;
   updateColumn2: (id: string, value: string) => void;
   updateColumn3: (id: string, category: string, subcategory: string | undefined, value: boolean) => void;
   updateColumn4: (id: string, field: string, value: boolean | string) => void;
 }) {
+  const [duplicateWarning, setDuplicateWarning] = useState<string | null>(null);
+
+  const handleColumn1Change = (value: string) => {
+    updateColumn1(entry.id, value);
+    // Check for duplicates when user stops typing (debounced)
+    if (value.trim().length > 3) {
+      const duplicate = checkForDuplicate(value, entry.id);
+      if (duplicate && duplicate.toLowerCase() !== value.trim().toLowerCase()) {
+        setDuplicateWarning(duplicate);
+      } else {
+        setDuplicateWarning(null);
+      }
+    } else {
+      setDuplicateWarning(null);
+    }
+  };
   const column1Value = entry.column1 || entry.column1Text || '';
   const column2Value = entry.column2 || entry.column2Text || '';
   const column4Value = entry.column4.whereWasIToBlame || '';
@@ -622,13 +1016,14 @@ function ResentmentEntryCard({
   const column4Ref = useAutoResizeTextarea(column4Value, 180, 60);
 
   return (
-    <div className="bg-slate-50 rounded-xl border-2 border-slate-200 p-6 shadow-sm">
+      <div className="bg-slate-50 rounded-xl border-2 border-slate-200 p-6 shadow-sm">
       <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-200">
         <h4 className="text-base font-semibold text-slate-700">Entry #{index + 1}</h4>
         <button
           type="button"
           onClick={() => deleteEntry(entry.id)}
           className="p-1.5 text-slate-400 hover:text-red-600 transition-colors"
+          title="Delete entry"
         >
           <Trash2 className="w-4 h-4" />
         </button>
@@ -648,11 +1043,16 @@ function ResentmentEntryCard({
             {activeColumn === 1 && <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded">Focus</span>}
             {activeColumn !== 1 && <span className="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded">Reference</span>}
           </label>
+          {duplicateWarning && (
+            <div className="mb-2 p-2 bg-amber-50 border border-amber-300 rounded text-xs text-amber-800">
+              <strong>Possible duplicate:</strong> This looks similar to "{duplicateWarning}"
+            </div>
+          )}
           <Textarea
             ref={column1Ref}
             value={column1Value}
             onChange={(e) => {
-              updateColumn1(entry.id, e.target.value);
+              handleColumn1Change(e.target.value);
               // Auto-resize on change
               const textarea = e.target;
               textarea.style.height = 'auto';
@@ -1025,19 +1425,36 @@ function ResentmentEntryCard({
 // Fears Section Component
 function FearsSection({
   entries,
+  searchQuery,
+  setSearchQuery,
   showPrompts,
   setShowPrompts,
   addEntry,
   deleteEntry,
+  duplicateEntry,
   updateEntry,
 }: {
   entries: FearEntry[];
+  searchQuery: string;
+  setSearchQuery: (query: string) => void;
   showPrompts: boolean;
   setShowPrompts: (show: boolean) => void;
   addEntry: () => void;
   deleteEntry: (id: string) => void;
+  duplicateEntry: (id: string) => void;
   updateEntry: (id: string, field: 'fear' | 'partOfSelfFailed' | 'fearPrayer', value: string) => void;
 }) {
+  const filteredEntries = searchQuery.trim()
+    ? entries.filter(entry => {
+        const query = searchQuery.toLowerCase();
+        return (
+          entry.fear?.toLowerCase().includes(query) ||
+          entry.partOfSelfFailed?.toLowerCase().includes(query) ||
+          entry.fearPrayer?.toLowerCase().includes(query)
+        );
+      })
+    : entries;
+
   return (
     <div>
       <div className="mb-4 p-4 bg-blue-50 border-l-4 border-blue-400 text-sm text-blue-800 rounded-lg">
@@ -1067,24 +1484,70 @@ function FearsSection({
         </div>
       )}
 
+      {/* Search */}
+      {entries.length > 0 && (
+        <div className="mb-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search fears..."
+              className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery('')}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
+          </div>
+          {searchQuery && (
+            <p className="text-xs text-slate-500 mt-2">
+              {filteredEntries.length === 0 ? 'No entries match' : `${filteredEntries.length} ${filteredEntries.length === 1 ? 'entry' : 'entries'} found`}
+            </p>
+          )}
+        </div>
+      )}
+
       {/* Entries */}
       <div className="space-y-4 pb-24">
-        {entries.length === 0 ? (
+        {filteredEntries.length === 0 && entries.length > 0 ? (
           <div className="text-center py-12 px-4">
-            <p className="text-slate-600 mb-4">Tap "Add Entry" below to begin</p>
+            <p className="text-slate-600 mb-4">No entries match your search.</p>
+          </div>
+        ) : filteredEntries.length === 0 ? (
+          <div className="text-center py-12 px-4">
+            <p className="text-slate-700 text-base mb-2 font-medium">Acknowledging fears takes courage. Take your time.</p>
+            <p className="text-slate-500 text-sm">There's no right or wrong way to do this.</p>
           </div>
         ) : (
-          entries.map((entry, index) => (
+          filteredEntries.map((entry, index) => (
             <div key={entry.id} className="bg-slate-50 rounded-xl border-2 border-slate-200 p-6 shadow-sm">
               <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-200">
                 <h4 className="text-base font-semibold text-slate-700">Fear #{index + 1}</h4>
-                <button
-                  type="button"
-                  onClick={() => deleteEntry(entry.id)}
-                  className="p-1.5 text-slate-400 hover:text-red-600 transition-colors"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => duplicateEntry(entry.id)}
+                    className="p-1.5 text-slate-400 hover:text-blue-600 transition-colors"
+                    title="Duplicate entry"
+                  >
+                    <Copy className="w-4 h-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => deleteEntry(entry.id)}
+                    className="p-1.5 text-slate-400 hover:text-red-600 transition-colors"
+                    title="Delete entry"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
 
               <div className="space-y-4">
@@ -1155,15 +1618,33 @@ function FearsSection({
 // Sexual Conduct Section Component
 function SexualConductSection({
   entries,
+  searchQuery,
+  setSearchQuery,
   addEntry,
   deleteEntry,
+  checkForDuplicate,
   updateEntry,
 }: {
   entries: SexualConductEntry[];
+  searchQuery: string;
+  setSearchQuery: (query: string) => void;
   addEntry: () => void;
   deleteEntry: (id: string) => void;
+  checkForDuplicate: (text: string, currentEntryId?: string) => string | null;
   updateEntry: (id: string, field: keyof SexualConductEntry, value: string | boolean) => void;
 }) {
+  const filteredEntries = searchQuery.trim()
+    ? entries.filter(entry => {
+        const query = searchQuery.toLowerCase();
+        return (
+          entry.whomDidIHurt?.toLowerCase().includes(query) ||
+          entry.whatDidIDo?.toLowerCase().includes(query) ||
+          entry.whereWasIAtFault?.toLowerCase().includes(query) ||
+          entry.whatShouldIHaveDoneInstead?.toLowerCase().includes(query)
+        );
+      })
+    : entries;
+
   return (
     <div>
       <div className="mb-4 p-4 bg-blue-50 border-l-4 border-blue-400 text-sm text-blue-800 rounded-lg">
@@ -1171,24 +1652,70 @@ function SexualConductSection({
         <p className="text-xs">Again, make a list for yourself. What happened in each instance? How did it make you feel?</p>
       </div>
 
+      {/* Search */}
+      {entries.length > 0 && (
+        <div className="mb-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search entries..."
+              className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery('')}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
+          </div>
+          {searchQuery && (
+            <p className="text-xs text-slate-500 mt-2">
+              {filteredEntries.length === 0 ? 'No entries match' : `${filteredEntries.length} ${filteredEntries.length === 1 ? 'entry' : 'entries'} found`}
+            </p>
+          )}
+        </div>
+      )}
+
       {/* Entries */}
       <div className="space-y-4 pb-24">
-        {entries.length === 0 ? (
+        {filteredEntries.length === 0 && entries.length > 0 ? (
           <div className="text-center py-12 px-4">
-            <p className="text-slate-600 mb-4">Tap "Add Entry" below to begin</p>
+            <p className="text-slate-600 mb-4">No entries match your search.</p>
+          </div>
+        ) : filteredEntries.length === 0 ? (
+          <div className="text-center py-12 px-4">
+            <p className="text-slate-700 text-base mb-2 font-medium">This is important work. Be gentle with yourself.</p>
+            <p className="text-slate-500 text-sm">You can take breaks whenever you need to.</p>
           </div>
         ) : (
-          entries.map((entry, index) => (
+          filteredEntries.map((entry, index) => (
             <div key={entry.id} className="bg-slate-50 rounded-xl border-2 border-slate-200 p-6 shadow-sm">
               <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-200">
                 <h4 className="text-base font-semibold text-slate-700">Entry #{index + 1}</h4>
-                <button
-                  type="button"
-                  onClick={() => deleteEntry(entry.id)}
-                  className="p-1.5 text-slate-400 hover:text-red-600 transition-colors"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => duplicateEntry(entry.id)}
+                    className="p-1.5 text-slate-400 hover:text-blue-600 transition-colors"
+                    title="Duplicate entry"
+                  >
+                    <Copy className="w-4 h-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => deleteEntry(entry.id)}
+                    className="p-1.5 text-slate-400 hover:text-red-600 transition-colors"
+                    title="Delete entry"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
 
               <div className="space-y-4">
