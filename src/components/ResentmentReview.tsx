@@ -275,7 +275,8 @@ export function ResentmentReview({ weekNumber, storage }: ResentmentReviewProps)
       {showInstructions && (
         <div className="px-4 py-3 bg-slate-50 border-b border-slate-200 text-sm text-slate-700">
           <p className="mb-2"><strong>Work column by column:</strong> Complete Column 1 for all entries, then Column 2, then 3, then 4.</p>
-          <p className="text-xs text-slate-600">Column 1: Who/what are you resentful at? • Column 2: Why? • Column 3: Which part of self affected? • Column 4: What were your wrongs?</p>
+          <p className="text-xs text-slate-600 mb-2">Column 1: Who/what are you resentful at? • Column 2: Why? • Column 3: Which part of self affected? • Column 4: What were your wrongs?</p>
+          <p className="text-xs text-blue-700 italic">💡 All columns are visible for each entry so you can reference previous work. The highlighted column shows your current focus.</p>
         </div>
       )}
 
@@ -359,8 +360,8 @@ export function ResentmentReview({ weekNumber, storage }: ResentmentReviewProps)
         </div>
       )}
 
-      {/* Entries - Show Only Active Column */}
-      <div className="p-4 space-y-4 pb-24">
+      {/* Entries - Show All Columns */}
+      <div className="p-4 space-y-8 pb-24">
         {entries.length === 0 ? (
           <div className="text-center py-12 px-4">
             <p className="text-slate-600 mb-4">Tap "Add Entry" below to begin</p>
@@ -397,45 +398,72 @@ export function ResentmentReview({ weekNumber, storage }: ResentmentReviewProps)
                   </button>
                 </div>
 
-                {/* COLUMN 1 - Only show if activeColumn === 1 */}
-                {activeColumn === 1 && (
-                  <div className="bg-white rounded-lg p-4 border border-slate-200">
-                    <label className="text-sm font-semibold text-slate-700 mb-2 block">
+                <div className="space-y-4">
+                  {/* COLUMN 1 - Always visible */}
+                  <div className={`bg-white rounded-lg p-5 border-2 transition-all ${
+                    activeColumn === 1 
+                      ? 'border-blue-500 shadow-md' 
+                      : 'border-slate-200 opacity-75'
+                  }`}>
+                    <label className={`text-sm font-semibold mb-3 block ${
+                      activeColumn === 1 ? 'text-blue-700' : 'text-slate-600'
+                    }`}>
                       Column 1: I'm resentful at
+                      {activeColumn === 1 && <span className="ml-2 text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded">Focus</span>}
                     </label>
                     <Textarea
                       value={entry.column1 || entry.column1Text || ''}
                       onChange={(e) => updateColumn1(entry.id, e.target.value)}
                       placeholder="Who or what are you resentful at? (You can type or write with Apple Pencil - iPad will convert handwriting automatically)"
-                      className="w-full min-h-[100px] text-base resize-y"
-                      rows={3}
+                      className={`w-full resize-y ${
+                        activeColumn === 1 
+                          ? 'min-h-[180px] text-lg' 
+                          : 'min-h-[120px] text-base bg-slate-50'
+                      }`}
+                      rows={activeColumn === 1 ? 8 : 5}
                       inputMode="text"
                     />
                   </div>
-                )}
 
-                {/* COLUMN 2 - Only show if activeColumn === 2 */}
-                {activeColumn === 2 && (
-                  <div className="bg-white rounded-lg p-4 border border-slate-200">
-                    <label className="text-sm font-semibold text-slate-700 mb-2 block">
+                  {/* COLUMN 2 - Always visible */}
+                  <div className={`bg-white rounded-lg p-5 border-2 transition-all ${
+                    activeColumn === 2 
+                      ? 'border-blue-500 shadow-md' 
+                      : 'border-slate-200 opacity-75'
+                  }`}>
+                    <label className={`text-sm font-semibold mb-3 block ${
+                      activeColumn === 2 ? 'text-blue-700' : 'text-slate-600'
+                    }`}>
                       Column 2: The cause
+                      {activeColumn === 2 && <span className="ml-2 text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded">Focus</span>}
                     </label>
                     <Textarea
                       value={entry.column2 || entry.column2Text || ''}
                       onChange={(e) => updateColumn2(entry.id, e.target.value)}
                       placeholder="Why was I angry? What specifically caused the resentment? (You can type or write with Apple Pencil - iPad will convert handwriting automatically)"
-                      className="w-full min-h-[100px] text-base resize-y"
-                      rows={3}
+                      className={`w-full resize-y ${
+                        activeColumn === 2 
+                          ? 'min-h-[180px] text-lg' 
+                          : 'min-h-[120px] text-base bg-slate-50'
+                      }`}
+                      rows={activeColumn === 2 ? 8 : 5}
                       inputMode="text"
                     />
                   </div>
-                )}
 
-                {/* COLUMN 3 - AFFECTS MY - Only show if activeColumn === 3 */}
-                {activeColumn === 3 && (
-                  <div className="bg-white rounded-lg p-4 border border-slate-200">
-                    <div className="mb-3">
-                      <h5 className="text-sm font-semibold text-slate-700 mb-1">Column 3: Affects my</h5>
+                  {/* COLUMN 3 - Always visible */}
+                  <div className={`bg-white rounded-lg p-5 border-2 transition-all ${
+                    activeColumn === 3 
+                      ? 'border-blue-500 shadow-md' 
+                      : 'border-slate-200 opacity-75'
+                  }`}>
+                    <div className="mb-4">
+                      <h5 className={`text-sm font-semibold mb-1 ${
+                        activeColumn === 3 ? 'text-blue-700' : 'text-slate-600'
+                      }`}>
+                        Column 3: Affects my
+                        {activeColumn === 3 && <span className="ml-2 text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded">Focus</span>}
+                      </h5>
                       <p className="text-xs text-slate-500">Which part of self is affected?</p>
                     </div>
                     
@@ -619,13 +647,20 @@ export function ResentmentReview({ weekNumber, storage }: ResentmentReviewProps)
                       </div>
                     </div>
                   </div>
-                )}
 
-                {/* COLUMN 4 - Nature of My Wrongs - Only show if activeColumn === 4 */}
-                {activeColumn === 4 && (
-                  <div className="bg-white rounded-lg p-4 border border-slate-200 space-y-4">
+                  {/* COLUMN 4 - Always visible */}
+                  <div className={`bg-white rounded-lg p-5 border-2 transition-all space-y-5 ${
+                    activeColumn === 4 
+                      ? 'border-blue-500 shadow-md' 
+                      : 'border-slate-200 opacity-75'
+                  }`}>
                     <div>
-                      <h5 className="text-sm font-semibold text-slate-700 mb-1">Column 4: Nature of my wrongs</h5>
+                      <h5 className={`text-sm font-semibold mb-1 ${
+                        activeColumn === 4 ? 'text-blue-700' : 'text-slate-600'
+                      }`}>
+                        Column 4: Nature of my wrongs
+                        {activeColumn === 4 && <span className="ml-2 text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded">Focus</span>}
+                      </h5>
                       <p className="text-xs text-slate-500">What is the exact nature of my wrongs, faults, mistakes, defects, shortcomings</p>
                     </div>
                     
@@ -692,7 +727,9 @@ export function ResentmentReview({ weekNumber, storage }: ResentmentReviewProps)
 
                     {/* Where Was I To Blame */}
                     <div>
-                      <label className="text-sm font-semibold text-slate-700 mb-2 block">
+                      <label className={`text-sm font-semibold mb-2 block ${
+                        activeColumn === 4 ? 'text-blue-700' : 'text-slate-600'
+                      }`}>
                         Where was I to blame?
                       </label>
                       <p className="text-xs text-slate-500 mb-2">What's the truth here? Where was my responsibility?</p>
@@ -700,13 +737,17 @@ export function ResentmentReview({ weekNumber, storage }: ResentmentReviewProps)
                         value={entry.column4.whereWasIToBlame || ''}
                         onChange={(e) => updateColumn4(entry.id, 'whereWasIToBlame', e.target.value)}
                         placeholder="What was my part? What could I have done differently? (You can type or write with Apple Pencil - iPad will convert handwriting automatically)"
-                        className="w-full min-h-[100px] text-base resize-y"
-                        rows={3}
+                        className={`w-full resize-y ${
+                          activeColumn === 4 
+                            ? 'min-h-[180px] text-lg' 
+                            : 'min-h-[120px] text-base bg-slate-50'
+                        }`}
+                        rows={activeColumn === 4 ? 8 : 5}
                         inputMode="text"
                       />
                     </div>
                   </div>
-                )}
+                </div>
               </div>
             );
           })
