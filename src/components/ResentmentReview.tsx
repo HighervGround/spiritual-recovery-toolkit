@@ -447,19 +447,23 @@ export function ResentmentReview({ weekNumber, storage }: ResentmentReviewProps)
                   {/* COLUMN 3 - Show only when activeColumn === 3 */}
                   {activeColumn === 3 && (
                   <div className="bg-white rounded-lg p-5 border-2 border-blue-500 shadow-md transition-all">
-                    <div className="mb-4">
-                      <h5 className="text-sm font-semibold mb-1 text-blue-700">
-                        Column 3: Affects my
+                    <div className="mb-5">
+                      <h5 className="text-base font-semibold mb-2 text-blue-700">
+                        Column 3: Which part of me was affected?
                         <span className="ml-2 text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded">Focus</span>
                       </h5>
-                      <p className="text-xs text-slate-500">Which part of self is affected?</p>
+                      <div className="bg-blue-50 border-l-4 border-blue-400 p-3 rounded text-sm text-blue-800">
+                        <p className="font-medium mb-1">Think about:</p>
+                        <p className="text-xs">What part of yourself felt hurt, threatened, or damaged by this resentment? Check all that apply.</p>
+                      </div>
                     </div>
                     
-                    <div className="space-y-4">
+                    <div className="space-y-5">
                       {/* Social Instinct */}
-                      <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
-                        <h6 className="text-sm font-bold text-slate-700 mb-3 uppercase tracking-wide">Social Instinct</h6>
-                        <div className="grid grid-cols-2 gap-3">
+                      <div className="bg-slate-50 rounded-lg p-4 border-2 border-slate-300">
+                        <h6 className="text-base font-bold text-slate-800 mb-2">Social Instinct</h6>
+                        <p className="text-xs text-slate-600 mb-4 italic">How I relate to others and my place in the world</p>
+                        <div className="space-y-3">
                           <label className={`flex items-start gap-3 cursor-pointer p-4 rounded-lg transition-all border-2 ${
                             entry.column3.socialInstinct.selfEsteem
                               ? 'bg-blue-100 border-blue-500 shadow-md'
@@ -473,8 +477,8 @@ export function ResentmentReview({ weekNumber, storage }: ResentmentReviewProps)
                               className="w-6 h-6 mt-0.5"
                             />
                             <div className="flex-1">
-                              <span className="text-base font-semibold text-slate-900 block">Self-Esteem</span>
-                              <span className="text-xs text-slate-600">How I think of myself</span>
+                              <span className="text-base font-semibold text-slate-900 block mb-1">Self-Esteem</span>
+                              <span className="text-xs text-slate-600">My sense of self-worth, how I see myself</span>
                             </div>
                           </label>
                           <label className={`flex items-start gap-3 cursor-pointer p-4 rounded-lg transition-all border-2 ${
@@ -490,8 +494,8 @@ export function ResentmentReview({ weekNumber, storage }: ResentmentReviewProps)
                               className="w-6 h-6 mt-0.5"
                             />
                             <div className="flex-1">
-                              <span className="text-base font-semibold text-slate-900 block">Personal Relationships</span>
-                              <span className="text-xs text-slate-600">Our relations with other people</span>
+                              <span className="text-base font-semibold text-slate-900 block mb-1">Personal Relationships</span>
+                              <span className="text-xs text-slate-600">My connections with family, friends, or loved ones</span>
                             </div>
                           </label>
                           <label className={`flex items-start gap-3 cursor-pointer p-4 rounded-lg transition-all border-2 ${
@@ -507,8 +511,8 @@ export function ResentmentReview({ weekNumber, storage }: ResentmentReviewProps)
                               className="w-6 h-6 mt-0.5"
                             />
                             <div className="flex-1">
-                              <span className="text-base font-semibold text-slate-900 block">Material</span>
-                              <span className="text-xs text-slate-600">Money, property, possessions</span>
+                              <span className="text-base font-semibold text-slate-900 block mb-1">Material</span>
+                              <span className="text-xs text-slate-600">My money, property, possessions, or financial security</span>
                             </div>
                           </label>
                           <label className={`flex items-start gap-3 cursor-pointer p-4 rounded-lg transition-all border-2 ${
@@ -524,18 +528,19 @@ export function ResentmentReview({ weekNumber, storage }: ResentmentReviewProps)
                               className="w-6 h-6 mt-0.5"
                             />
                             <div className="flex-1">
-                              <span className="text-base font-semibold text-slate-900 block">Emotional Security</span>
-                              <span className="text-xs text-slate-600">General sense of personal well being</span>
+                              <span className="text-base font-semibold text-slate-900 block mb-1">Emotional Security</span>
+                              <span className="text-xs text-slate-600">My overall sense of safety and well-being</span>
                             </div>
                           </label>
                         </div>
                       </div>
 
                       {/* Security Instinct */}
-                      <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
-                        <h6 className="text-sm font-bold text-slate-700 mb-3 uppercase tracking-wide">Security Instinct</h6>
-                        <div className="grid grid-cols-2 gap-3">
-                          <label className={`flex items-center gap-3 cursor-pointer p-4 rounded-lg transition-all border-2 ${
+                      <div className="bg-slate-50 rounded-lg p-4 border-2 border-slate-300">
+                        <h6 className="text-base font-bold text-slate-800 mb-2">Security Instinct</h6>
+                        <p className="text-xs text-slate-600 mb-4 italic">My need for safety and stability</p>
+                        <div className="space-y-3">
+                          <label className={`flex items-start gap-3 cursor-pointer p-4 rounded-lg transition-all border-2 ${
                             entry.column3.securityInstinct.social
                               ? 'bg-blue-100 border-blue-500 shadow-md'
                               : 'bg-white border-slate-300 hover:border-blue-400 hover:bg-blue-50'
@@ -545,11 +550,14 @@ export function ResentmentReview({ weekNumber, storage }: ResentmentReviewProps)
                               onCheckedChange={(checked) =>
                                 updateColumn3(entry.id, 'securityInstinct', 'social', checked as boolean)
                               }
-                              className="w-6 h-6"
+                              className="w-6 h-6 mt-0.5"
                             />
-                            <span className="text-base font-semibold text-slate-900">Social</span>
+                            <div className="flex-1">
+                              <span className="text-base font-semibold text-slate-900 block mb-1">Social Security</span>
+                              <span className="text-xs text-slate-600">My sense of belonging, acceptance, or social standing</span>
+                            </div>
                           </label>
-                          <label className={`flex items-center gap-3 cursor-pointer p-4 rounded-lg transition-all border-2 ${
+                          <label className={`flex items-start gap-3 cursor-pointer p-4 rounded-lg transition-all border-2 ${
                             entry.column3.securityInstinct.security
                               ? 'bg-blue-100 border-blue-500 shadow-md'
                               : 'bg-white border-slate-300 hover:border-blue-400 hover:bg-blue-50'
@@ -559,18 +567,22 @@ export function ResentmentReview({ weekNumber, storage }: ResentmentReviewProps)
                               onCheckedChange={(checked) =>
                                 updateColumn3(entry.id, 'securityInstinct', 'security', checked as boolean)
                               }
-                              className="w-6 h-6"
+                              className="w-6 h-6 mt-0.5"
                             />
-                            <span className="text-base font-semibold text-slate-900">Security</span>
+                            <div className="flex-1">
+                              <span className="text-base font-semibold text-slate-900 block mb-1">Physical Security</span>
+                              <span className="text-xs text-slate-600">My physical safety, health, or basic survival needs</span>
+                            </div>
                           </label>
                         </div>
                       </div>
 
                       {/* Sex Instinct */}
-                      <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
-                        <h6 className="text-sm font-bold text-slate-700 mb-3 uppercase tracking-wide">Sex Instinct</h6>
-                        <div className="grid grid-cols-1 gap-3">
-                          <label className={`flex items-center gap-3 cursor-pointer p-4 rounded-lg transition-all border-2 ${
+                      <div className="bg-slate-50 rounded-lg p-4 border-2 border-slate-300">
+                        <h6 className="text-base font-bold text-slate-800 mb-2">Sex Instinct</h6>
+                        <p className="text-xs text-slate-600 mb-4 italic">My sexual relationships and intimacy needs</p>
+                        <div className="space-y-3">
+                          <label className={`flex items-start gap-3 cursor-pointer p-4 rounded-lg transition-all border-2 ${
                             entry.column3.sexInstinct.acceptableSexRelations
                               ? 'bg-blue-100 border-blue-500 shadow-md'
                               : 'bg-white border-slate-300 hover:border-blue-400 hover:bg-blue-50'
@@ -580,11 +592,14 @@ export function ResentmentReview({ weekNumber, storage }: ResentmentReviewProps)
                               onCheckedChange={(checked) =>
                                 updateColumn3(entry.id, 'sexInstinct', 'acceptableSexRelations', checked as boolean)
                               }
-                              className="w-6 h-6"
+                              className="w-6 h-6 mt-0.5"
                             />
-                            <span className="text-base font-semibold text-slate-900">Acceptable Sex Relations</span>
+                            <div className="flex-1">
+                              <span className="text-base font-semibold text-slate-900 block mb-1">Acceptable Sex Relations</span>
+                              <span className="text-xs text-slate-600">My healthy, consensual intimate relationships</span>
+                            </div>
                           </label>
-                          <label className={`flex items-center gap-3 cursor-pointer p-4 rounded-lg transition-all border-2 ${
+                          <label className={`flex items-start gap-3 cursor-pointer p-4 rounded-lg transition-all border-2 ${
                             entry.column3.sexInstinct.hiddenSexRelations
                               ? 'bg-blue-100 border-blue-500 shadow-md'
                               : 'bg-white border-slate-300 hover:border-blue-400 hover:bg-blue-50'
@@ -594,11 +609,14 @@ export function ResentmentReview({ weekNumber, storage }: ResentmentReviewProps)
                               onCheckedChange={(checked) =>
                                 updateColumn3(entry.id, 'sexInstinct', 'hiddenSexRelations', checked as boolean)
                               }
-                              className="w-6 h-6"
+                              className="w-6 h-6 mt-0.5"
                             />
-                            <span className="text-base font-semibold text-slate-900">Hidden Sex Relations</span>
+                            <div className="flex-1">
+                              <span className="text-base font-semibold text-slate-900 block mb-1">Hidden Sex Relations</span>
+                              <span className="text-xs text-slate-600">Secret or hidden intimate relationships</span>
+                            </div>
                           </label>
-                          <label className={`flex items-center gap-3 cursor-pointer p-4 rounded-lg transition-all border-2 ${
+                          <label className={`flex items-start gap-3 cursor-pointer p-4 rounded-lg transition-all border-2 ${
                             entry.column3.sexInstinct.sexual
                               ? 'bg-blue-100 border-blue-500 shadow-md'
                               : 'bg-white border-slate-300 hover:border-blue-400 hover:bg-blue-50'
@@ -608,17 +626,21 @@ export function ResentmentReview({ weekNumber, storage }: ResentmentReviewProps)
                               onCheckedChange={(checked) =>
                                 updateColumn3(entry.id, 'sexInstinct', 'sexual', checked as boolean)
                               }
-                              className="w-6 h-6"
+                              className="w-6 h-6 mt-0.5"
                             />
-                            <span className="text-base font-semibold text-slate-900">Sexual</span>
+                            <div className="flex-1">
+                              <span className="text-base font-semibold text-slate-900 block mb-1">Sexual</span>
+                              <span className="text-xs text-slate-600">My general sexual needs or desires</span>
+                            </div>
                           </label>
                         </div>
                       </div>
 
                       {/* Ambitions */}
-                      <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
-                        <h6 className="text-sm font-bold text-slate-700 mb-3 uppercase tracking-wide">Ambitions</h6>
-                        <label className={`flex items-center gap-3 cursor-pointer p-4 rounded-lg transition-all border-2 ${
+                      <div className="bg-slate-50 rounded-lg p-4 border-2 border-slate-300">
+                        <h6 className="text-base font-bold text-slate-800 mb-2">Ambitions</h6>
+                        <p className="text-xs text-slate-600 mb-4 italic">My goals, dreams, and aspirations</p>
+                        <label className={`flex items-start gap-3 cursor-pointer p-4 rounded-lg transition-all border-2 ${
                           entry.column3.ambitions
                             ? 'bg-blue-100 border-blue-500 shadow-md'
                             : 'bg-white border-slate-300 hover:border-blue-400 hover:bg-blue-50'
@@ -628,9 +650,12 @@ export function ResentmentReview({ weekNumber, storage }: ResentmentReviewProps)
                             onCheckedChange={(checked) =>
                               updateColumn3(entry.id, 'ambitions', undefined, checked as boolean)
                             }
-                            className="w-6 h-6"
+                            className="w-6 h-6 mt-0.5"
                           />
-                          <span className="text-base font-semibold text-slate-900">Ambitions</span>
+                          <div className="flex-1">
+                            <span className="text-base font-semibold text-slate-900 block mb-1">Ambitions</span>
+                            <span className="text-xs text-slate-600">My career goals, personal achievements, or life aspirations</span>
+                          </div>
                         </label>
                       </div>
                     </div>

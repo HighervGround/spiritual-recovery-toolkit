@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Check, Edit2, Save, X, ChevronDown, ChevronUp } from 'lucide-react';
 import { WeekProgress } from '../lib/storage';
 import type { StorageBackend } from '../lib/storageBackend';
-import { ResentmentReview } from './ResentmentReview';
+import { Step4Inventory } from './Step4Inventory';
 
 interface Week {
   number: number;
@@ -26,24 +26,15 @@ const weeklyPlan: Week[] = [
   },
   {
     number: 2,
-    steps: "Step 4 (Part 1)",
-    theme: "Self-Awareness: Beginning Inventory",
-    emotionalFocus: "Curiosity and compassion toward patterns",
-    dailyPractice: "Write for 15 minutes each morning: What patterns am I noticing? Where do I see fear, resentment, or shame? Use the lullaby technique each night to soften self-judgment.",
-    affirmation: "I look at my past with compassion and courage.",
-    grounding: "Body scan meditation. Lie down and bring gentle awareness to each part of your body, thanking it for carrying you this far."
+    steps: "Step 4",
+    theme: "Self-Awareness: Complete Inventory",
+    emotionalFocus: "Curiosity and compassion toward patterns, honoring survival strategies and grieving what no longer serves",
+    dailyPractice: "Write for 15 minutes each morning: What patterns am I noticing? Where do I see fear, resentment, or shame? What protected me once but limits me now? What strengths do I also carry? Use the lullaby technique each night to soften self-judgment. Practice revision technique for one painful memory.",
+    affirmation: "I look at my past with compassion and courage. I am more than my mistakes; I am a soul learning and growing.",
+    grounding: "Body scan meditation. Lie down and bring gentle awareness to each part of your body, thanking it for carrying you this far. Or walk slowly in nature or around your space. With each step, say: 'I release.' 'I am free.' 'I am whole.'"
   },
   {
     number: 3,
-    steps: "Step 4 (Part 2)",
-    theme: "Self-Awareness: Deepening Inventory",
-    emotionalFocus: "Honoring survival strategies and grieving what no longer serves",
-    dailyPractice: "Continue journaling. Add: What protected me once but limits me now? What strengths do I also carry? Practice revision technique for one painful memory.",
-    affirmation: "I am more than my mistakes; I am a soul learning and growing.",
-    grounding: "Walk slowly in nature or around your space. With each step, say: 'I release.' 'I am free.' 'I am whole.'"
-  },
-  {
-    number: 4,
     steps: "Step 5",
     theme: "Vulnerability: Speaking Truth",
     emotionalFocus: "Courage to be witnessed with compassion",
@@ -52,7 +43,7 @@ const weeklyPlan: Week[] = [
     grounding: "Sit quietly with a warm drink. Place both hands around the cup and breathe in warmth. You are safe to be seen."
   },
   {
-    number: 5,
+    number: 4,
     steps: "Step 6",
     theme: "Willingness: Readiness to Change",
     emotionalFocus: "Honoring resistance while inviting transformation",
@@ -61,7 +52,7 @@ const weeklyPlan: Week[] = [
     grounding: "Hold something in your hands (a stone, a cup, etc.). Feel its weight. Set it down. Notice the freedom in your hands. This is letting go."
   },
   {
-    number: 6,
+    number: 5,
     steps: "Step 7",
     theme: "Humility: Asking for Help",
     emotionalFocus: "Trust in grace and collaborative healing",
@@ -70,7 +61,7 @@ const weeklyPlan: Week[] = [
     grounding: "Kneel, sit, or stand with palms open. Speak your request aloud. Feel the relief of not carrying everything alone."
   },
   {
-    number: 7,
+    number: 6,
     steps: "Step 8",
     theme: "Accountability: Preparing to Repair",
     emotionalFocus: "Acknowledging impact with discernment and boundaries",
@@ -79,7 +70,7 @@ const weeklyPlan: Week[] = [
     grounding: "Write each name on a slip of paper. Hold each one, breathe, and say: 'I see you. I honor this.' Place them gently in a safe container."
   },
   {
-    number: 8,
+    number: 7,
     steps: "Step 9 (Part 1)",
     theme: "Integrity: Making Amends",
     emotionalFocus: "Courage to repair without attachment to outcome",
@@ -88,7 +79,7 @@ const weeklyPlan: Week[] = [
     grounding: "Before each amends conversation, breathe deeply 10 times. Place your hand on your heart and say: 'I am doing my part.'"
   },
   {
-    number: 9,
+    number: 8,
     steps: "Step 9 (Part 2)",
     theme: "Integrity: Continuing Repairs",
     emotionalFocus: "Honoring the process, releasing perfectionism",
@@ -97,7 +88,7 @@ const weeklyPlan: Week[] = [
     grounding: "After each amends, rest. Place your hands over your heart and say: 'I have done what I can. I release the rest.'"
   },
   {
-    number: 10,
+    number: 9,
     steps: "Step 10",
     theme: "Daily Practice: Ongoing Awareness",
     emotionalFocus: "Living with integrity and self-compassion",
@@ -106,7 +97,7 @@ const weeklyPlan: Week[] = [
     grounding: "End each day by placing your hand on your heart and saying: 'I did my best today. I am learning. I am growing.'"
   },
   {
-    number: 11,
+    number: 10,
     steps: "Step 11",
     theme: "Spiritual Connection: Deepening Practice",
     emotionalFocus: "Listening for guidance and aligning with highest good",
@@ -115,7 +106,7 @@ const weeklyPlan: Week[] = [
     grounding: "Sit in silence. Light a candle if you wish. Ask a question. Listen for the answer—it may come as a feeling, an image, or a knowing."
   },
   {
-    number: 12,
+    number: 11,
     steps: "Step 12 – Integration & Gratitude",
     theme: "Service & Living the Principles",
     emotionalFocus: "Celebrating transformation and committing to ongoing practice",
@@ -195,20 +186,20 @@ export function WeeklyPlan({ storage }: WeeklyPlanProps) {
       <div className="px-4 py-6 border-b border-slate-200">
         <h2 className="text-2xl font-semibold text-black mb-2">12-Week Plan</h2>
         <p className="text-base text-slate-600 leading-relaxed mb-4">
-          Your flexible, self-guided journey through the 12 Steps over 12 weeks. Steps 1–3 are completed together 
-          in Week 1 to establish foundation. Steps 4 and 9 receive two weeks each for deep work.
+          Your flexible, self-guided journey through the 12 Steps over 11 weeks. Steps 1–3 are completed together 
+          in Week 1 to establish foundation. Step 9 receives two weeks for deep work.
         </p>
         
         {/* Progress Indicator */}
         <div className="pt-4">
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm text-slate-600">Weekly Progress</span>
-            <span className="text-base font-medium text-black">{completedWeeks} of 12</span>
+            <span className="text-base font-medium text-black">{completedWeeks} of 11</span>
           </div>
           <div className="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
             <div 
               className="bg-blue-600 h-full transition-all duration-500"
-              style={{ width: `${(completedWeeks / 12) * 100}%` }}
+              style={{ width: `${(completedWeeks / 11) * 100}%` }}
             />
           </div>
         </div>
@@ -268,9 +259,9 @@ export function WeeklyPlan({ storage }: WeeklyPlanProps) {
               {/* Expanded Content */}
               {isExpanded && (
                 <div className="px-4 py-4 space-y-4 bg-slate-50">
-                  {/* Resentment Review for Step 4 (Weeks 2 and 3) */}
-                  {(week.number === 2 || week.number === 3) && (
-                    <ResentmentReview weekNumber={week.number} storage={storage} />
+                  {/* Step 4 Inventory for Week 2 */}
+                  {week.number === 2 && (
+                    <Step4Inventory weekNumber={week.number} storage={storage} />
                   )}
 
                   {/* Personal Notes Section */}

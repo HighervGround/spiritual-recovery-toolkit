@@ -19,13 +19,15 @@ export interface StepProgress {
   lastUpdated: string;
 }
 
-import type { ResentmentEntry } from './storage';
+import type { ResentmentEntry, FearEntry, SexualConductEntry } from './storage';
 
 export interface WeekProgress {
   weekNumber: number;
   completed: boolean;
   notes: string;
   resentmentEntries?: ResentmentEntry[];
+  fearEntries?: FearEntry[];
+  sexualConductEntries?: SexualConductEntry[];
   lastUpdated: string;
 }
 
@@ -143,6 +145,7 @@ export const supabaseStorage = {
         stepNumber: i + 1,
         completed: false,
         notes: '',
+        reflectionAnswers: {},
         lastUpdated: new Date().toISOString(),
       }));
     }
@@ -245,6 +248,8 @@ export const supabaseStorage = {
         completed: false,
         notes: '',
         resentmentEntries: [],
+        fearEntries: [],
+        sexualConductEntries: [],
         lastUpdated: new Date().toISOString(),
       }));
     }
@@ -273,6 +278,16 @@ export const supabaseStorage = {
           ? (typeof existing.resentment_entries === 'string' 
               ? JSON.parse(existing.resentment_entries) 
               : existing.resentment_entries)
+          : [],
+        fearEntries: existing?.fear_entries 
+          ? (typeof existing.fear_entries === 'string' 
+              ? JSON.parse(existing.fear_entries) 
+              : existing.fear_entries)
+          : [],
+        sexualConductEntries: existing?.sexual_conduct_entries 
+          ? (typeof existing.sexual_conduct_entries === 'string' 
+              ? JSON.parse(existing.sexual_conduct_entries) 
+              : existing.sexual_conduct_entries)
           : [],
         lastUpdated: existing?.updated_at || new Date().toISOString(),
       };
@@ -308,6 +323,12 @@ export const supabaseStorage = {
     }
     if (updates.resentmentEntries !== undefined) {
       updateData.resentment_entries = JSON.stringify(updates.resentmentEntries);
+    }
+    if (updates.fearEntries !== undefined) {
+      updateData.fear_entries = JSON.stringify(updates.fearEntries);
+    }
+    if (updates.sexualConductEntries !== undefined) {
+      updateData.sexual_conduct_entries = JSON.stringify(updates.sexualConductEntries);
     }
 
     if (existing) {
@@ -345,6 +366,12 @@ export const supabaseStorage = {
 
       if (updates.resentmentEntries !== undefined) {
         insertData.resentment_entries = JSON.stringify(updates.resentmentEntries);
+      }
+      if (updates.fearEntries !== undefined) {
+        insertData.fear_entries = JSON.stringify(updates.fearEntries);
+      }
+      if (updates.sexualConductEntries !== undefined) {
+        insertData.sexual_conduct_entries = JSON.stringify(updates.sexualConductEntries);
       }
 
       const { error } = await supabase

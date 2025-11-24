@@ -54,11 +54,29 @@ export interface ResentmentEntry {
   };
 }
 
+export interface FearEntry {
+  id: string;
+  fear: string; // What am I afraid of?
+  partOfSelfFailed: string; // Which part of self have I been relying on which has failed me?
+  fearPrayer?: string; // Optional: personalized fear prayer
+}
+
+export interface SexualConductEntry {
+  id: string;
+  whomDidIHurt: string; // Whom did I hurt?
+  whatDidIDo: string; // We list each thing we did to them
+  didIUnjustifiablyAvoid: boolean; // Did I unjustifiably avoid?
+  whereWasIAtFault: string; // Where was I at fault?
+  whatShouldIHaveDoneInstead: string; // What should I have done instead?
+}
+
 export interface WeekProgress {
   weekNumber: number;
   completed: boolean;
   notes: string;
   resentmentEntries?: ResentmentEntry[];
+  fearEntries?: FearEntry[];
+  sexualConductEntries?: SexualConductEntry[];
   lastUpdated: string;
 }
 
@@ -85,6 +103,8 @@ export const storage = {
             completed: parsed.weeklyPlanProgress?.[i + 1] || false,
             notes: '',
             resentmentEntries: [],
+            fearEntries: [],
+            sexualConductEntries: [],
             lastUpdated: new Date().toISOString(),
           }));
         }
@@ -109,6 +129,8 @@ export const storage = {
         completed: false,
         notes: '',
         resentmentEntries: [],
+        fearEntries: [],
+        sexualConductEntries: [],
         lastUpdated: new Date().toISOString(),
       })),
     };
