@@ -5,6 +5,25 @@ import { Checkbox } from './ui/checkbox';
 import type { ResentmentEntry, FearEntry, SexualConductEntry } from '../lib/storage';
 import type { StorageBackend } from '../lib/storageBackend';
 
+// Hook to auto-resize textarea based on content
+function useAutoResizeTextarea(value: string, minHeightWhenEmpty: number = 100, minHeightWhenFilled: number = 40) {
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    const textarea = textareaRef.current;
+    if (textarea) {
+      // Reset height to auto to get the correct scrollHeight
+      textarea.style.height = 'auto';
+      // Use smaller min-height if there's content, larger if empty
+      const minH = value.trim().length > 0 ? minHeightWhenFilled : minHeightWhenEmpty;
+      const newHeight = Math.max(textarea.scrollHeight, minH);
+      textarea.style.height = `${newHeight}px`;
+    }
+  }, [value, minHeightWhenEmpty, minHeightWhenFilled]);
+
+  return textareaRef;
+}
+
 // Helpful prompts from Step 4 worksheets
 const PEOPLE_PROMPTS = [
   'Father', 'Mother', 'Sisters', 'Brothers', 'Aunts', 'Uncles', 'Cousins',
@@ -511,16 +530,18 @@ function ResentmentsSection({
                 key={col}
                 type="button"
                 onClick={() => setActiveColumn(col as 1 | 2 | 3 | 4)}
-                className={`relative flex-1 px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-1 ${
+                className={`relative flex-1 px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2 ${
                   activeColumn === col
                     ? 'bg-blue-600 text-white'
                     : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                 }`}
               >
-                {isColumnCompleteForAllEntries && <CheckCircle2 className="w-4 h-4 text-white" />}
-                Column {col}
+                <div className="flex items-center gap-2">
+                  {isColumnCompleteForAllEntries && <CheckCircle2 className="w-4 h-4 shrink-0" />}
+                  <span className="whitespace-nowrap">Column {col}</span>
+                </div>
                 {entries.length > 0 && (
-                  <span className={`ml-1 text-xs px-2 py-0.5 rounded-full ${activeColumn === col ? 'bg-blue-700 text-white' : 'bg-slate-200 text-slate-600'}`}>
+                  <span className={`ml-1 text-xs font-semibold px-2 py-0.5 rounded-full shrink-0 ${activeColumn === col ? 'bg-blue-700 text-white' : 'bg-slate-200 text-slate-600'}`}>
                     {columnCompletionCount}
                   </span>
                 )}
@@ -588,6 +609,18 @@ function ResentmentEntryCard({
   updateColumn3: (id: string, category: string, subcategory: string | undefined, value: boolean) => void;
   updateColumn4: (id: string, field: string, value: boolean | string) => void;
 }) {
+  const column1Value = entry.column1 || entry.column1Text || '';
+  const column2Value = entry.column2 || entry.column2Text || '';
+  const column4Value = entry.column4.whereWasIToBlame || '';
+  
+  const column1Ref = useAutoResizeTextarea(
+    column1Value, 
+    activeColumn === 1 ? 180 : 100,  // min when empty
+    activeColumn === 1 ? 60 : 40     // min when filled
+  );
+  const column2Ref = useAutoResizeTextarea(column2Value, 180, 60);
+  const column4Ref = useAutoResizeTextarea(column4Value, 180, 60);
+
   return (
     <div className="bg-slate-50 rounded-xl border-2 border-slate-200 p-6 shadow-sm">
       <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-200">
@@ -608,23 +641,35 @@ function ResentmentEntryCard({
             ? 'border-blue-500 shadow-md' 
             : 'border-slate-200'
         }`}>
-          <label className={`text-sm font-semibold mb-3 block ${
+          <label className={`text-sm font-semibold mb-3 block flex items-center gap-2 ${
             activeColumn === 1 ? 'text-blue-700' : 'text-slate-600'
           }`}>
-            Column 1: I'm resentful at
-            {activeColumn === 1 && <span className="ml-2 text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded">Focus</span>}
-            {activeColumn !== 1 && <span className="ml-2 text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded">Reference</span>}
+            <span>Column 1: I'm resentful at</span>
+            {activeColumn === 1 && <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded">Focus</span>}
+            {activeColumn !== 1 && <span className="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded">Reference</span>}
           </label>
           <Textarea
-            value={entry.column1 || entry.column1Text || ''}
-            onChange={(e) => updateColumn1(entry.id, e.target.value)}
+            ref={column1Ref}
+            value={column1Value}
+            onChange={(e) => {
+              updateColumn1(entry.id, e.target.value);
+              // Auto-resize on change
+              const textarea = e.target;
+              textarea.style.height = 'auto';
+              // Use smaller min-height if there's content, larger if empty
+              const minH = column1Value.trim().length > 0 
+                ? (activeColumn === 1 ? 60 : 40) 
+                : (activeColumn === 1 ? 180 : 100);
+              const newHeight = Math.max(textarea.scrollHeight, minH);
+              textarea.style.height = `${newHeight}px`;
+            }}
             placeholder="Who or what are you resentful at? (You can type or write with Apple Pencil - iPad will convert handwriting automatically)"
-            className={`w-full resize-y ${
+            className={`w-full resize-y overflow-hidden ${
               activeColumn === 1 
-                ? 'min-h-[180px] text-lg' 
-                : 'min-h-[100px] text-base bg-slate-50'
+                ? `${column1Value.trim().length > 0 ? '' : 'min-h-[180px]'} text-lg` 
+                : `${column1Value.trim().length > 0 ? '' : 'min-h-[100px]'} text-base bg-slate-50`
             }`}
-            rows={activeColumn === 1 ? 8 : 4}
+            rows={column1Value.trim().length > 0 ? 1 : (activeColumn === 1 ? 8 : 4)}
             inputMode="text"
           />
         </div>
@@ -632,16 +677,25 @@ function ResentmentEntryCard({
         {/* Column 2 - Show only when activeColumn === 2 */}
         {activeColumn === 2 && (
           <div className="bg-white rounded-lg p-5 border-2 border-blue-500 shadow-md transition-all">
-            <label className="text-sm font-semibold mb-3 block text-blue-700">
-              Column 2: The cause
-              <span className="ml-2 text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded">Focus</span>
+            <label className="text-sm font-semibold mb-3 block flex items-center gap-2 text-blue-700">
+              <span>Column 2: The cause</span>
+              <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded">Focus</span>
             </label>
             <Textarea
-              value={entry.column2 || entry.column2Text || ''}
-              onChange={(e) => updateColumn2(entry.id, e.target.value)}
+              ref={column2Ref}
+              value={column2Value}
+              onChange={(e) => {
+                updateColumn2(entry.id, e.target.value);
+                // Auto-resize on change
+                const textarea = e.target;
+                textarea.style.height = 'auto';
+                const minH = column2Value.trim().length > 0 ? 60 : 180;
+                const newHeight = Math.max(textarea.scrollHeight, minH);
+                textarea.style.height = `${newHeight}px`;
+              }}
               placeholder="Why was I angry? What specifically caused the resentment?"
-              className="w-full resize-y min-h-[180px] text-lg"
-              rows={8}
+              className={`w-full resize-y overflow-hidden ${column2Value.trim().length > 0 ? '' : 'min-h-[180px]'} text-lg`}
+              rows={column2Value.trim().length > 0 ? 1 : 8}
               inputMode="text"
             />
           </div>
@@ -651,9 +705,9 @@ function ResentmentEntryCard({
         {activeColumn === 3 && (
           <div className="bg-white rounded-lg p-5 border-2 border-blue-500 shadow-md transition-all">
             <div className="mb-5">
-              <h5 className="text-base font-semibold mb-2 text-blue-700">
-                Column 3: Which part of me was affected?
-                <span className="ml-2 text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded">Focus</span>
+              <h5 className="text-base font-semibold mb-2 flex items-center gap-2 text-blue-700">
+                <span>Column 3: Which part of me was affected?</span>
+                <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded">Focus</span>
               </h5>
               <div className="bg-blue-50 border-l-4 border-blue-400 p-3 rounded text-sm text-blue-800">
                 <p className="font-medium mb-1">Think about:</p>
@@ -869,9 +923,9 @@ function ResentmentEntryCard({
         {activeColumn === 4 && (
           <div className="bg-white rounded-lg p-5 border-2 border-blue-500 shadow-md transition-all space-y-5">
             <div>
-              <h5 className="text-sm font-semibold mb-1 text-blue-700">
-                Column 4: Nature of my wrongs
-                <span className="ml-2 text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded">Focus</span>
+              <h5 className="text-sm font-semibold mb-1 flex items-center gap-2 text-blue-700">
+                <span>Column 4: Nature of my wrongs</span>
+                <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded">Focus</span>
               </h5>
               <p className="text-xs text-slate-500">What is the exact nature of my wrongs, faults, mistakes, defects, shortcomings</p>
             </div>
@@ -944,11 +998,20 @@ function ResentmentEntryCard({
               </label>
               <p className="text-xs text-slate-500 mb-2">What's the truth here? Where was my responsibility?</p>
               <Textarea
-                value={entry.column4.whereWasIToBlame || ''}
-                onChange={(e) => updateColumn4(entry.id, 'whereWasIToBlame', e.target.value)}
+                ref={column4Ref}
+                value={column4Value}
+                onChange={(e) => {
+                  updateColumn4(entry.id, 'whereWasIToBlame', e.target.value);
+                  // Auto-resize on change
+                  const textarea = e.target;
+                  textarea.style.height = 'auto';
+                  const minH = column4Value.trim().length > 0 ? 60 : 180;
+                  const newHeight = Math.max(textarea.scrollHeight, minH);
+                  textarea.style.height = `${newHeight}px`;
+                }}
                 placeholder="What was my part? What could I have done differently? (You can type or write with Apple Pencil - iPad will convert handwriting automatically)"
-                className="w-full resize-y min-h-[180px] text-lg"
-                rows={8}
+                className={`w-full resize-y overflow-hidden ${column4Value.trim().length > 0 ? '' : 'min-h-[180px]'} text-lg`}
+                rows={column4Value.trim().length > 0 ? 1 : 8}
                 inputMode="text"
               />
             </div>
