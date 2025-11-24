@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Plus, Trash2, ChevronDown, ChevronUp, CheckCircle2, HelpCircle, Lightbulb } from 'lucide-react';
+import { Plus, Trash2, ChevronDown, ChevronUp, CheckCircle2, HelpCircle, Lightbulb, ChevronRight } from 'lucide-react';
 import { Textarea } from './ui/textarea';
 import { Checkbox } from './ui/checkbox';
 // Removed HandwritingCanvas - using iPad native handwriting-to-text instead
@@ -284,45 +284,78 @@ export function ResentmentReview({ weekNumber, storage }: ResentmentReviewProps)
         <div className="sticky top-[57px] z-10 bg-white border-b border-slate-200 px-4 py-3">
           <div className="flex gap-2">
             {[1, 2, 3, 4].map((col) => {
-              const canAccess = col === 1 || 
-                (col === 2 && entries.every(e => {
-                  const val = e.column1 || e.column1Text || '';
-                  return val.trim().length > 0;
-                })) ||
-                (col === 3 && entries.every(e => {
-                  const val = e.column2 || e.column2Text || '';
-                  return val.trim().length > 0;
-                })) ||
-                (col === 4 && entries.every(e => {
-                  const col2Done = (e.column2 || e.column2Text || '').trim().length > 0;
-                  return col2Done && (
-                    e.column3.socialInstinct.selfEsteem || e.column3.socialInstinct.personalRelationships ||
-                    e.column3.socialInstinct.material || e.column3.socialInstinct.emotional ||
-                    e.column3.securityInstinct.social || e.column3.securityInstinct.security ||
-                    e.column3.sexInstinct.acceptableSexRelations || e.column3.sexInstinct.hiddenSexRelations ||
-                    e.column3.sexInstinct.sexual || e.column3.ambitions
-                  );
-                }));
+              // Calculate completion count for guidance (but don't block access)
+              const completionCount = col === 1 ? entries.filter(e => {
+                const val = e.column1 || e.column1Text || '';
+                return val.trim().length > 0;
+              }).length :
+              col === 2 ? entries.filter(e => {
+                const val = e.column2 || e.column2Text || '';
+                return val.trim().length > 0;
+              }).length :
+              col === 3 ? entries.filter(e => {
+                const col2Done = (e.column2 || e.column2Text || '').trim().length > 0;
+                return col2Done && (
+                  e.column3.socialInstinct.selfEsteem || e.column3.socialInstinct.personalRelationships ||
+                  e.column3.socialInstinct.material || e.column3.socialInstinct.emotional ||
+                  e.column3.securityInstinct.social || e.column3.securityInstinct.security ||
+                  e.column3.sexInstinct.acceptableSexRelations || e.column3.sexInstinct.hiddenSexRelations ||
+                  e.column3.sexInstinct.sexual || e.column3.ambitions
+                );
+              }).length :
+              entries.filter(e => {
+                const col3Done = (e.column2 || e.column2Text || '').trim().length > 0 && (
+                  e.column3.socialInstinct.selfEsteem || e.column3.socialInstinct.personalRelationships ||
+                  e.column3.socialInstinct.material || e.column3.socialInstinct.emotional ||
+                  e.column3.securityInstinct.social || e.column3.securityInstinct.security ||
+                  e.column3.sexInstinct.acceptableSexRelations || e.column3.sexInstinct.hiddenSexRelations ||
+                  e.column3.sexInstinct.sexual || e.column3.ambitions
+                );
+                return col3Done && (
+                  e.column4.selfish || e.column4.dishonest ||
+                  e.column4.selfSeekingAndFrightened || e.column4.inconsiderate
+                );
+              }).length;
+
+              const isComplete = completionCount === entries.length && entries.length > 0;
+              const showProgress = completionCount > 0 && completionCount < entries.length;
 
               return (
                 <button
                   key={col}
                   type="button"
-                  onClick={() => canAccess && setActiveColumn(col as 1 | 2 | 3 | 4)}
-                  disabled={!canAccess}
-                  className={`flex-1 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                  onClick={() => setActiveColumn(col as 1 | 2 | 3 | 4)}
+                  className={`flex-1 px-4 py-2 rounded-lg text-sm font-medium transition-all relative ${
                     activeColumn === col
                       ? 'bg-blue-600 text-white'
-                      : canAccess
-                      ? 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                      : 'bg-slate-50 text-slate-400 opacity-50 cursor-not-allowed'
+                      : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                   }`}
                 >
-                  Column {col}
+                  <div className="flex items-center justify-center gap-1.5">
+                    <span>Column {col}</span>
+                    {isComplete && (
+                      <CheckCircle2 className="w-4 h-4" />
+                    )}
+                  </div>
+                  {showProgress && (
+                    <span className="absolute -top-1 -right-1 text-xs bg-blue-500 text-white rounded-full w-5 h-5 flex items-center justify-center">
+                      {completionCount}
+                    </span>
+                  )}
                 </button>
               );
             })}
           </div>
+          {activeColumn < 4 && (
+            <button
+              type="button"
+              onClick={() => setActiveColumn((activeColumn + 1) as 1 | 2 | 3 | 4)}
+              className="mt-3 w-full flex items-center justify-center gap-2 px-4 py-2 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 text-sm font-medium transition-all"
+            >
+              <span>Continue to Column {activeColumn + 1}</span>
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          )}
         </div>
       )}
 
