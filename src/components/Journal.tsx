@@ -203,6 +203,17 @@ export function Journal({ storage }: JournalProps) {
           </div>
         </div>
 
+        {/* Connection Note */}
+        {filteredEntries.length === 0 && (
+          <div className="px-4 mb-4">
+            <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
+              <p className="text-xs text-slate-600 leading-relaxed">
+                <strong>💡 Tip:</strong> Use this journal to process insights from the Workbook, document expressive arts work, or reflect on your Weekly Plan practices. All your work connects and supports your healing journey.
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Notes List */}
         <div className="divide-y divide-slate-200">
           {filteredEntries.length === 0 ? (

@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Check, Edit2, Save, X, ChevronDown, ChevronUp } from 'lucide-react';
 import { WeekProgress } from '../lib/storage';
 import type { StorageBackend } from '../lib/storageBackend';
+import { ResentmentReview } from './ResentmentReview';
 
 interface Week {
   number: number;
@@ -153,9 +154,15 @@ export function WeeklyPlan({ storage }: WeeklyPlanProps) {
   };
 
   const toggleWeekComplete = async (weekNumber: number) => {
-    const current = getWeekProgress(weekNumber);
-    await storage.updateWeekProgress(weekNumber, { completed: !current.completed });
-    await loadWeekProgress();
+    try {
+      const current = getWeekProgress(weekNumber);
+      await storage.updateWeekProgress(weekNumber, { completed: !current.completed });
+      await loadWeekProgress();
+    } catch (error: any) {
+      console.error('Error toggling week completion:', error);
+      const errorMessage = error?.message || error?.toString() || 'Unknown error';
+      alert(`Error updating week progress: ${errorMessage}\n\nIf using Supabase, make sure you've run the migration to add the resentment_entries column.`);
+    }
   };
 
   const toggleWeek = (weekNumber: number) => {
@@ -246,7 +253,9 @@ export function WeeklyPlan({ storage }: WeeklyPlanProps) {
               {/* Complete Button */}
               <div className="px-4 pb-3">
                 <button
+                  type="button"
                   onClick={(e) => {
+                    e.preventDefault();
                     e.stopPropagation();
                     toggleWeekComplete(week.number);
                   }}
@@ -259,6 +268,11 @@ export function WeeklyPlan({ storage }: WeeklyPlanProps) {
               {/* Expanded Content */}
               {isExpanded && (
                 <div className="px-4 py-4 space-y-4 bg-slate-50">
+                  {/* Resentment Review for Step 4 (Weeks 2 and 3) */}
+                  {(week.number === 2 || week.number === 3) && (
+                    <ResentmentReview weekNumber={week.number} storage={storage} />
+                  )}
+
                   {/* Personal Notes Section */}
                   <div className="bg-white rounded-lg p-4 border border-slate-200">
                     <div className="flex items-center justify-between mb-3">
@@ -311,17 +325,28 @@ export function WeeklyPlan({ storage }: WeeklyPlanProps) {
 
                   <div>
                     <h4 className="text-base font-medium text-black mb-2">Daily Practice</h4>
-                    <p className="text-base text-slate-600 leading-relaxed">{week.dailyPractice}</p>
+                    <p className="text-base text-slate-600 leading-relaxed mb-2">{week.dailyPractice}</p>
+                    {(week.dailyPractice.includes('lullaby') || week.dailyPractice.includes('revision') || week.dailyPractice.includes('mental diet')) && (
+                      <p className="text-xs text-slate-500 italic mt-2">
+                        💡 These techniques are explained in detail in the Workbook section. Check the corresponding step for full instructions.
+                      </p>
+                    )}
                   </div>
 
                   <div className="bg-white rounded-lg p-4 border-l-4 border-blue-600">
                     <h4 className="text-base font-medium text-black mb-2">This Week's Affirmation</h4>
-                    <p className="text-base text-slate-600 leading-relaxed">"{week.affirmation}"</p>
+                    <p className="text-base text-slate-600 leading-relaxed mb-2">"{week.affirmation}"</p>
+                    <p className="text-xs text-slate-500 italic">
+                      Use this daily, or choose from the affirmations in the Workbook for this step. Both approaches support your healing.
+                    </p>
                   </div>
 
                   <div className="bg-white rounded-lg p-4 border border-slate-200">
                     <h4 className="text-base font-medium text-black mb-2">Grounding Exercise</h4>
-                    <p className="text-base text-slate-600 leading-relaxed">{week.grounding}</p>
+                    <p className="text-base text-slate-600 leading-relaxed mb-2">{week.grounding}</p>
+                    <p className="text-xs text-slate-500 italic">
+                      This complements the meditation practices in the Workbook. Use grounding whenever you feel overwhelmed or need to return to the present moment.
+                    </p>
                   </div>
                 </div>
               )}

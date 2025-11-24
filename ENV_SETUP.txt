@@ -18,3 +18,4 @@ If you don't set up Supabase, the app will automatically use localStorage instea
 
 
 
+

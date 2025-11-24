@@ -18,6 +18,12 @@ interface Step {
     mentalDiet: string;
     selfConcept: string;
   };
+  meditation?: {
+    title: string;
+    instructions: string[];
+  };
+  expressiveArtsPrompt?: string;
+  languageModification?: string;
   miniSummary: string;
 }
 
@@ -59,6 +65,20 @@ const steps: Step[] = [
       mentalDiet: "Notice when you think: 'I should be able to handle this alone' or 'I'm failing.' Pause. Replace it with: 'I am brave for recognizing my limits. I am worthy of support.'",
       selfConcept: "I am someone who is honest with myself. I am someone who chooses healing over hiding. I am someone worthy of peace and support."
     },
+    meditation: {
+      title: "Basic Grounding Meditation",
+      instructions: [
+        "Take a posture that feels sustainable for the amount of time you have scheduled.",
+        "Notice contact points. If seated in a chair, notice your back against the chair, your seat, the backs of your legs, your feet on the floor.",
+        "Notice other contact points, like your arms against your body, and your hands wherever they rest.",
+        "Notice if one or more of these points feels grounded, or more grounded than the others. If you notice 'I don't feel particularly grounded,' see if you can notice that lack of grounding with as little judgment as possible.",
+        "If you do feel some grounding somewhere, go ahead and lean into that grounding. Let yourself have that ground.",
+        "For the remainder of this meditation, allow yourself to continue to lean into that ground. If anything changes, let yourself notice it and move with it if necessary. Reground yourself at any time.",
+        "Five minutes a day is just fine, and if five minutes is too long, one minute is just fine. The key is to practice daily or as consistently as possible."
+      ]
+    },
+    expressiveArtsPrompt: "If freewriting alone on Step One does not feel sufficient, is there a way you can bring in another expressive practice (e.g., visual art, fiction, or poetry writing, playlist construction, songwriting, dancing, or acting out a dramatic scene—even if it's something as simple as making a gesture or series of gestures that reflects what this step means to you at this point in your journey)?",
+    languageModification: "The step does not say that we are powerless people. The step simply says that we are powerless when it comes to alcohol, drugs, etc. This means that if we put alcohol or drugs into our body, they will win every time. By admitting defeat, we are carving the pathway to reclaim our power on the road ahead.",
     miniSummary: "I carry forward the truth that honesty is the beginning of freedom, and surrender is not defeat—it is courage."
   },
   {
@@ -98,6 +118,19 @@ const steps: Step[] = [
       mentalDiet: "When you notice thoughts like 'Nothing will help' or 'I'm beyond repair,' pause. Gently replace them with: 'I am willing to believe. Healing is already beginning.'",
       selfConcept: "I am someone who is open to hope. I am someone who can receive support. I am someone worthy of restoration and peace."
     },
+    meditation: {
+      title: "Meditation: Befriending Your Breath",
+      instructions: [
+        "You may close your eyes, leave them open, or experiment with the two. Whichever position will help you feel safe enough yet stay engaged with the practice is optimal.",
+        "Engage in the shoulder crunch and release at least three more times. Every time you release, try to pay a little more attention to how your breath responds to the release.",
+        "Move into at least thirty seconds of just noticing the breath as it naturally rises and falls in your body. You do not have to do anything special with technique, simply notice. Does your breath feel warm, cool, or neutral moving through your body?",
+        "You may notice that your mind starts to wander. This is normal! Instead of judging yourself, see if you can invite the attention back to the breath when you notice it wandering.",
+        "Some people find it helpful to hold a grounding or anchoring object in their hand while they try this exercise (e.g., a rock, a recovery coin).",
+        "Another favorite anchoring device is to repeat as you breathe: 'As I breathe in, I know I am breathing in. As I breathe out, I know I am breathing out.' You can simply modify this to 'In' (as you breathe in) and 'Out' (as you breathe out)."
+      ]
+    },
+    expressiveArtsPrompt: "If freewriting alone on Step Two does not feel sufficient, is there a way you can bring in another expressive practice (e.g., visual art, fiction, or poetry writing, playlist construction, songwriting, dancing, or acting out a dramatic scene—even if it's something as simple as making a gesture or series of gestures that reflects what this step means to you at this point in your journey)?",
+    languageModification: "A great struggle with this step is the element of spirituality it introduces. However, if a trauma survivor relied on the fight of self-sufficiency to get through the trauma, it may be very difficult for them to accept that something outside of themselves is going to help them heal. The word 'sanity' also poses an interesting challenge. If we need to be 'restored to sanity,' then we must be insane! Consider using the word 'unhealthy' for now if 'sanity' feels triggering.",
     miniSummary: "I carry forward the truth that hope is real, healing is possible, and I am not alone in this journey."
   },
   {
@@ -137,6 +170,20 @@ const steps: Step[] = [
       mentalDiet: "Notice when your mind spirals into control, worry, or forcing. Pause. Say to yourself: 'I choose to trust. I release this to higher care.' Return to your breath.",
       selfConcept: "I am someone who trusts wisely. I am someone who can surrender with courage. I am someone aligned with love and healing."
     },
+    meditation: {
+      title: "Meditation: Higher or Inner Power Visualization",
+      instructions: [
+        "Begin by coming into at least thirty seconds of mindful breathing with your eyes closed or opened. Do whatever you may need to in order to feel supported and grounded before engaging in breath.",
+        "Set an intention to work with the essence of Step Three for this meditation and ask yourself, through the breath, what needs to be revealed. Begin by asking which terminology may work best for you: God, Higher Power, Inner Power, spirit, the universe, humankind, the Greater Good, or something completely different.",
+        "Notice what is revealed without forcing it and learn to listen to that vital spark that says, 'This is it!' You will likely know it if you feel it. If nothing particularly resonates for you the first time, that's okay too. You can always try this as many times as you need to.",
+        "After the term that works for you reveals itself, spend at least thirty seconds reflecting on it. With every breath, connect to it. Begin noticing how the body feels.",
+        "Notice if anything emerges visually. The less you force it, the more likely your connection will happen. For some people the visual that shows up looks like a person or group of people, for others it's more like a light or even a sensation.",
+        "You cannot do anything wrong here! This may mean that you need to intentionally send away any old pictures or conceptualizations of what you were taught 'God' or 'Higher Power' needed to look like. You can literally shake it off or flick your hands to the ground in release.",
+        "Whenever you see or sense into what is revealed, spend as much time as you need noticing it without judgment. Notice what happens in your breath. Notice what happens to your body."
+      ]
+    },
+    expressiveArtsPrompt: "If freewriting alone on Step Three does not feel sufficient, is there a way you can bring in another expressive practice (e.g., visual art, fiction or poetry writing, playlist construction, songwriting, dancing, or acting out a dramatic scene—even if it's something as simple as making a gesture or series of gestures that reflects what this step means to you at this point in your journey)?",
+    languageModification: "Although the step references God, you are completely free to define God/Higher Power/Inner Power or any alternative concept as you see fit. This may fly in the face of how you were raised or feel like it's egotistical for you to do the defining. Your self-esteem could also feel so low right now that you're filled with ideas that anything you conceptualize cannot possibly be good. See if you can set all of this aside and simply riff on how you need to conceptualize God/Higher Power, etc. in a way that works for you and your recovery today.",
     miniSummary: "I carry forward the truth that trust is a daily practice, and letting go is not loss—it is freedom."
   },
   {
@@ -176,6 +223,21 @@ const steps: Step[] = [
       mentalDiet: "When self-judgment arises—'I'm terrible,' 'I always mess up'—pause. Replace it with: 'I am learning. I am human. I am worthy of compassion.'",
       selfConcept: "I am someone who looks at myself honestly. I am someone who chooses growth over shame. I am someone deserving of my own kindness."
     },
+    meditation: {
+      title: "Meditation: Loving Kindness",
+      instructions: [
+        "First, take a posture that feels sustainable for the amount of time you have scheduled for this meditation.",
+        "Notice contact points. If you are seated in a chair, notice the sensation of your back against the chair, your seat, the backs of your legs, your feet on the floor.",
+        "Notice other contact points, like your arms against your body, and your hands wherever they rest.",
+        "Notice if one or more of these points of contact feels grounded. If what you notice is 'I don't feel particularly grounded,' then see if you can notice that lack of grounding with as little judgment as possible.",
+        "Begin to silently repeat the loving kindness phrases: 'May I be free from fear; May I be healthy (or healed); May I be happy; May I be at ease.' You can start with three rounds of these phrases for yourself.",
+        "Now begin emanating these phrases outward. You might start with someone it is easy to send loving kindness to, like a loved one or a pet. 'May you be free from fear; May you be healthy; May you be happy; May you be at ease.'",
+        "You can then move outward incrementally, sending it to everyone on your block, everyone in your city, your country, this world. For the last round, consider sending one more set of these phrases back toward yourself.",
+        "As with other meditations, we are looking here not for quantity, but rather for consistency of practice. Five minutes is just fine, and if five minutes is too long, one minute is just fine."
+      ]
+    },
+    expressiveArtsPrompt: "If freewriting alone on Step Four does not feel sufficient, is there a way you can bring in another expressive practice (e.g., visual art, fiction or poetry writing, playlist construction, songwriting, dancing, or acting out a dramatic scene—even if it's something as simple as making a gesture or series of gestures that reflects what the step means to you at this point in your journey)?",
+    languageModification: "Step Four should never be a punishment, rather it is an opportunity to take stock—a natural extension of what may have led us to approach this program or work a Step One in the first place. If I can reword and thus rethink this step as 'taking stock' of the things I see about myself, both healthy/unhealthy and everything in between, might that ease some of the anxiety around the concept of 'moral inventory'?",
     miniSummary: "I carry forward the truth that self-awareness is an act of love, and I am more than my past."
   },
   {
@@ -596,6 +658,25 @@ export function Workbook({ storage }: WorkbookProps) {
           trauma-informed reflection, deep questions, and Joseph Murphy's subconscious mind practices.
         </p>
         
+        {/* How Everything Works Together */}
+        <div className="bg-blue-50 rounded-lg p-4 border border-blue-200 mb-4">
+          <h3 className="text-sm font-semibold text-blue-900 mb-2">How Everything Works Together</h3>
+          <div className="space-y-2 text-xs text-blue-800 leading-relaxed">
+            <p>
+              <strong>📖 Workbook (this section):</strong> Deep dive into each step with meditations, reflection questions, and daily practices. Work at your own pace.
+            </p>
+            <p>
+              <strong>📅 Weekly Plan:</strong> Structured 12-week journey that references techniques from the Workbook. Use the daily practices, affirmations, and grounding exercises throughout your week.
+            </p>
+            <p>
+              <strong>✍️ Journal:</strong> Free-form space to process, reflect, and document your expressive arts work or any insights that arise.
+            </p>
+            <p className="italic mt-2">
+              All approaches are trauma-informed and designed to work together. You can use them separately or combine them—whatever supports your healing journey.
+            </p>
+          </div>
+        </div>
+        
         {/* Progress Indicator */}
         <div className="pt-4">
           <div className="flex items-center justify-between mb-2">
@@ -724,6 +805,47 @@ export function Workbook({ storage }: WorkbookProps) {
                   <p className="text-base text-slate-600 leading-relaxed">{step.traumaInformed}</p>
                 </div>
 
+                {/* Meditation */}
+                {step.meditation && (
+                  <div className="bg-white rounded-lg p-4 border border-slate-200">
+                    <div className="flex items-start justify-between mb-3">
+                      <h4 className="text-base font-medium text-black">{step.meditation.title}</h4>
+                      <span className="text-xs text-slate-500 bg-slate-100 px-2 py-1 rounded">From Workbook</span>
+                    </div>
+                    <p className="text-sm text-slate-600 mb-3 italic">This meditation complements the Joseph Murphy practices below. Use whichever approach resonates with you, or combine them.</p>
+                    <div className="space-y-3">
+                      {step.meditation.instructions.map((instruction, idx) => (
+                        <div key={idx} className="flex gap-3">
+                          <span className="text-blue-600 font-medium shrink-0">{idx + 1}.</span>
+                          <p className="text-base text-slate-700 leading-relaxed">{instruction}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Language Modification */}
+                {step.languageModification && (
+                  <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
+                    <h4 className="text-base font-medium text-blue-900 mb-2">Language Modification Guidance</h4>
+                    <p className="text-sm text-blue-800 leading-relaxed mb-2">{step.languageModification}</p>
+                    <p className="text-xs text-blue-700 italic mt-2">
+                      Remember: You have complete permission to modify language to fit your experience. This is trauma-informed recovery—flexibility and self-compassion are essential.
+                    </p>
+                  </div>
+                )}
+
+                {/* Expressive Arts Prompt */}
+                {step.expressiveArtsPrompt && (
+                  <div className="bg-purple-50 rounded-lg p-4 border border-purple-200">
+                    <h4 className="text-base font-medium text-purple-900 mb-2">Expressive Arts Option</h4>
+                    <p className="text-sm text-purple-800 leading-relaxed mb-2">{step.expressiveArtsPrompt}</p>
+                    <p className="text-xs text-purple-700 italic mt-2">
+                      You can use your Journal section to document your expressive work, or keep it in a separate notebook. There's no right or wrong way to express yourself.
+                    </p>
+                  </div>
+                )}
+
                 {/* Reflection Questions */}
                 <div>
                   <h4 className="text-base font-medium text-black mb-3">Reflection Questions</h4>
@@ -783,7 +905,11 @@ export function Workbook({ storage }: WorkbookProps) {
 
                 {/* Joseph Murphy Practices */}
                 <div className="bg-white rounded-lg p-4 border border-slate-200 space-y-4">
-                  <h4 className="text-base font-medium text-black">Joseph Murphy Practices</h4>
+                  <div className="flex items-start justify-between mb-2">
+                    <h4 className="text-base font-medium text-black">Joseph Murphy Practices</h4>
+                    <span className="text-xs text-slate-500 bg-slate-100 px-2 py-1 rounded">Daily Tools</span>
+                  </div>
+                  <p className="text-sm text-slate-600 italic mb-4">These practices are designed to be used daily throughout your week. They work alongside the meditation above and support your trauma-informed recovery journey.</p>
 
                   <div>
                     <h5 className="text-sm font-medium text-black mb-2">Daily Affirmations</h5>
@@ -825,7 +951,10 @@ export function Workbook({ storage }: WorkbookProps) {
                 {/* Mini Summary */}
                 <div className="bg-white rounded-lg p-4 border-l-4 border-blue-600">
                   <h4 className="text-base font-medium text-black mb-2">What Truth Am I Carrying Forward?</h4>
-                  <p className="text-base text-slate-600 leading-relaxed">{step.miniSummary}</p>
+                  <p className="text-base text-slate-600 leading-relaxed mb-2">{step.miniSummary}</p>
+                  <p className="text-xs text-slate-500 italic mt-2">
+                    This truth can guide you through your Weekly Plan practices and daily life. Return to it whenever you need grounding or clarity.
+                  </p>
                 </div>
                 </div>
               )}

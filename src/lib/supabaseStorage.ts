@@ -19,10 +19,13 @@ export interface StepProgress {
   lastUpdated: string;
 }
 
+import type { ResentmentEntry } from './storage';
+
 export interface WeekProgress {
   weekNumber: number;
   completed: boolean;
   notes: string;
+  resentmentEntries?: ResentmentEntry[];
   lastUpdated: string;
 }
 
@@ -241,6 +244,7 @@ export const supabaseStorage = {
         weekNumber: i + 1,
         completed: false,
         notes: '',
+        resentmentEntries: [],
         lastUpdated: new Date().toISOString(),
       }));
     }
@@ -265,6 +269,11 @@ export const supabaseStorage = {
         weekNumber,
         completed: existing?.completed || false,
         notes: existing?.notes || '',
+        resentmentEntries: existing?.resentment_entries 
+          ? (typeof existing.resentment_entries === 'string' 
+              ? JSON.parse(existing.resentment_entries) 
+              : existing.resentment_entries)
+          : [],
         lastUpdated: existing?.updated_at || new Date().toISOString(),
       };
     });
@@ -274,19 +283,32 @@ export const supabaseStorage = {
     const user = await this.getCurrentUser();
     if (!user) throw new Error('User not authenticated');
 
-    // Check if week progress exists
-    const { data: existing } = await supabase
+    // Check if week progress exists (use maybeSingle to avoid error if not found)
+    const { data: existing, error: fetchError } = await supabase
       .from('weekly_progress')
       .select('id')
       .eq('user_id', user.id)
       .eq('week_number', weekNumber)
-      .single();
+      .maybeSingle();
 
-    const updateData = {
-      completed: updates.completed,
-      notes: updates.notes,
+    if (fetchError && fetchError.code !== 'PGRST116') { // PGRST116 is "not found" which is OK
+      throw fetchError;
+    }
+
+    const updateData: any = {
       updated_at: new Date().toISOString(),
     };
+
+    // Only include fields that are being updated
+    if (updates.completed !== undefined) {
+      updateData.completed = updates.completed;
+    }
+    if (updates.notes !== undefined) {
+      updateData.notes = updates.notes;
+    }
+    if (updates.resentmentEntries !== undefined) {
+      updateData.resentment_entries = JSON.stringify(updates.resentmentEntries);
+    }
 
     if (existing) {
       // Update existing
@@ -296,18 +318,52 @@ export const supabaseStorage = {
         .eq('user_id', user.id)
         .eq('week_number', weekNumber);
 
-      if (error) throw error;
+      if (error) {
+        // If error is about missing column, try without resentment_entries
+        if (error.message?.includes('resentment_entries') || error.code === '42703') {
+          const updateDataWithoutResentment = { ...updateData };
+          delete updateDataWithoutResentment.resentment_entries;
+          const { error: retryError } = await supabase
+            .from('weekly_progress')
+            .update(updateDataWithoutResentment)
+            .eq('user_id', user.id)
+            .eq('week_number', weekNumber);
+          if (retryError) throw retryError;
+        } else {
+          throw error;
+        }
+      }
     } else {
       // Insert new
+      const insertData: any = {
+        user_id: user.id,
+        week_number: weekNumber,
+        completed: updates.completed ?? false,
+        notes: updates.notes ?? '',
+        updated_at: new Date().toISOString(),
+      };
+
+      if (updates.resentmentEntries !== undefined) {
+        insertData.resentment_entries = JSON.stringify(updates.resentmentEntries);
+      }
+
       const { error } = await supabase
         .from('weekly_progress')
-        .insert({
-          user_id: user.id,
-          week_number: weekNumber,
-          ...updateData,
-        });
+        .insert(insertData);
 
-      if (error) throw error;
+      if (error) {
+        // If error is about missing column, try without resentment_entries
+        if (error.message?.includes('resentment_entries') || error.code === '42703') {
+          const insertDataWithoutResentment = { ...insertData };
+          delete insertDataWithoutResentment.resentment_entries;
+          const { error: retryError } = await supabase
+            .from('weekly_progress')
+            .insert(insertDataWithoutResentment);
+          if (retryError) throw retryError;
+        } else {
+          throw error;
+        }
+      }
     }
   },
 

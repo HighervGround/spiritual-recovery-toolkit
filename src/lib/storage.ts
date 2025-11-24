@@ -17,10 +17,48 @@ export interface StepProgress {
   lastUpdated: string;
 }
 
+export interface ResentmentEntry {
+  id: string;
+  column1: string; // I'm resentful at (text)
+  column1Text?: string; // Text version (when handwriting mode is active, this preserves typed text)
+  column1IsHandwriting?: boolean; // true if currently in handwriting mode
+  column2: string; // The cause (text)
+  column2Text?: string; // Text version (when handwriting mode is active, this preserves typed text)
+  column2IsHandwriting?: boolean; // true if currently in handwriting mode
+  column3: {
+    socialInstinct: {
+      selfEsteem: boolean;
+      personalRelationships: boolean;
+      material: boolean;
+      emotional: boolean;
+    };
+    securityInstinct: {
+      social: boolean;
+      security: boolean;
+    };
+    sexInstinct: {
+      acceptableSexRelations: boolean;
+      hiddenSexRelations: boolean;
+      sexual: boolean;
+    };
+    ambitions: boolean;
+  };
+  column4: {
+    selfish: boolean;
+    dishonest: boolean;
+    selfSeekingAndFrightened: boolean;
+    inconsiderate: boolean;
+    whereWasIToBlame?: string; // Text
+    whereWasIToBlameText?: string; // Text version (when handwriting mode is active)
+    whereWasIToBlameIsHandwriting?: boolean; // true if currently in handwriting mode
+  };
+}
+
 export interface WeekProgress {
   weekNumber: number;
   completed: boolean;
   notes: string;
+  resentmentEntries?: ResentmentEntry[];
   lastUpdated: string;
 }
 
@@ -46,6 +84,7 @@ export const storage = {
             weekNumber: i + 1,
             completed: parsed.weeklyPlanProgress?.[i + 1] || false,
             notes: '',
+            resentmentEntries: [],
             lastUpdated: new Date().toISOString(),
           }));
         }
@@ -69,6 +108,7 @@ export const storage = {
         weekNumber: i + 1,
         completed: false,
         notes: '',
+        resentmentEntries: [],
         lastUpdated: new Date().toISOString(),
       })),
     };
